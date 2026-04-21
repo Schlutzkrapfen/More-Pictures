@@ -1,0 +1,19 @@
+label_studio:
+  # The base URL where your Label Studio instance is running
+  url: "http://localhost:8080"
+
+  # Your API key — either a Personal Access Token (PAT) or legacy access token
+  # Find it under Account & Settings → Access Token in the Label Studio UI
+  api_key: "YOUR_API_KEY"
+
+  # The numeric ID of the project you want to download images from
+  # You can find it in the URL: /projects/<project_id>/
+  project_id: 1
+
+download:
+  # Folder where downloaded images will be saved
+  output_dir: "downloaded_images"
+
+  # Set to true to only download tasks that have been fully annotated/completed
+  # Set to false to download all tasks regardless of annotation status
+  only_completed: true
