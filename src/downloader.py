@@ -1,25 +1,110 @@
 
 import yaml
+import sys
+import json
+from pathlib import Path
 from label_studio_sdk import LabelStudio
+from label_studio_sdk.core import ApiError
 
-# 1. Load the configuration from your YAML file
-with open("config.yml", "r") as f:
-    config = yaml.safe_load(f)
+def load_conf(file_path="config.yml"):
+    try:
+        with open(file_path, "r") as f:
+            config = yaml.safe_load(f)
+        
+        # Using .get() prevents KeyError if a section is missing
+        ls_section = config.get('label_studio', {})
+        dl_section = config.get('download', {})
 
-# 2. Extract values from the 'label_studio' section
-LS_URL = config['label_studio']['url']
-LS_API_KEY = config['label_studio']['api_key']
-PROJECT_ID = config['label_studio']['project_id']
+        return {
+            "url": ls_section.get('url'),
+            "api_key": ls_section.get('api_key'),
+            "project_id": ls_section.get('project_id'),
+            "output_dir": dl_section.get('output_dir', 'downloads'),
+            "only_completed": dl_section.get('only_completed', True)
+        }
+    except FileNotFoundError:
+        print(f" Error: The file '{file_path}' was not found.")
+        sys.exit(1)
+    except yaml.YAMLError as e:
+        print(f" Error: Failed to parse YAML file: {e}")
+        sys.exit(1)
 
-# 3. Extract values from the 'download' section
-OUTPUT_DIR = config['download']['output_dir']
-ONLY_COMPLETED = config['download']['only_completed']
+def connect_label_studio(base_url, api_key, project_id):
+    if not base_url or not api_key or api_key == "YOUR_API_KEY":
+         
+        print(" Error: URL or API Key is missing in the config file.")
+        return None
+    try:
+        client = LabelStudio(base_url=base_url, api_key=api_key)
+        
+        # The 'handshake': Try to fetch the project
+        project = client.projects.get(id=project_id)
+        print(f" Success! Connected to project: '{project.title}' (ID: {project_id})")
+        return client
 
-# 4. Initialize the Client
-client = LabelStudio(
-    base_url=LS_URL, 
-    api_key=LS_API_KEY
-)
+    except ApiError as e:
+        print(f" Label Studio API Error (Status {e.status_code}): {e.body}")
+    except Exception as e:
+        print(f" Unexpected Connection Error: {e}")
+    
+    return None
 
-print(f"Successfully connected to {LS_URL}")
-print(f"Ready to work with Project ID: {PROJECT_ID}")
+def fetch_tasks(client, project_id, only_completed=True):
+    """Fetch all tasks from the project, optionally filtering for completed ones only."""
+    print(f"\n  Fetching tasks (only_completed={only_completed})...")
+    try:
+        all_tasks = []
+        for task in client.tasks.list(project=project_id):
+            if only_completed and not task.is_labeled:
+                continue
+            all_tasks.append(task)
+
+        print(f"  Found {len(all_tasks)} task(s).")
+        return all_tasks
+    except ApiError as e:
+        print(f"  API Error while fetching tasks (Status {e.status_code}): {e.body}")
+        return []
+    except Exception as e:
+        print(f"  Unexpected error while fetching tasks: {e}")
+        return []
+
+def save_tasks(tasks, output_dir, project_id):
+    """Save fetched tasks to a JSON file inside output_dir."""
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    output_file = out_path / f"project_{project_id}_annotations.json"
+
+    # Convert SDK objects to plain dicts
+    serializable = []
+    for task in tasks:
+        if hasattr(task, "dict"):
+            serializable.append(task.dict())
+        elif hasattr(task, "__dict__"):
+            serializable.append(vars(task))
+        else:
+            serializable.append(task)
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(serializable, f, indent=2, default=str)
+
+    print(f"  Saved {len(serializable)} task(s) to '{output_file}'")
+    return output_file
+
+def main():
+    conf = load_conf()
+    
+    client = connect_label_studio(
+        conf['url'], 
+        conf['api_key'], 
+        conf['project_id']
+    )
+    tasks = fetch_tasks(client, conf['project_id'], conf['only_completed'])
+
+    if not tasks:
+        print("  No tasks to save. Exiting.")
+        sys.exit(0)
+    save_tasks(tasks, conf['output_dir'], conf['project_id'])
+    print("\n  Download complete.")
+
+main()
