@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 from downloader import load_conf,connect_label_studio,fetch_tasks,save_tasks,download_images
+from converter import  adjust_brightness
 def main():
     conf = load_conf()
     
@@ -13,11 +14,12 @@ def main():
     tasks = fetch_tasks(client, conf['project_id'], conf['only_completed'])
 
     if not tasks:
-        print("  No tasks to save. Exiting.")
+        print("No tasks to save. Exiting.")
         sys.exit(0)
     save_tasks(tasks, conf['output_dir'], conf['project_id'])
-    download_images(tasks,conf['api_key'],conf['url'],conf['output_dir'])
-    print("\n  Download complete.")
+    images_paths= download_images(tasks,conf['api_key'],conf['url'],conf['output_dir'])
+    print("Download complete.")
+    adjust_brightness(images_paths,0.5)
 
 if __name__ == "__main__":
     main()
