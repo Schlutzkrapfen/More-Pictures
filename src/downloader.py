@@ -8,6 +8,8 @@ from label_studio_sdk import LabelStudio
 from label_studio_sdk.core import ApiError
 
 def load_conf(file_path="config.yml"):
+    '''loads config with url,api key, project id, output dir, only completed'''
+
     try:
         with open(file_path, "r") as f:
             config = yaml.safe_load(f)
@@ -31,6 +33,7 @@ def load_conf(file_path="config.yml"):
         sys.exit(1)
 
 def connect_label_studio(base_url, api_key, project_id):
+    '''test if a connect to label studio can be made'''
     if not base_url or not api_key or api_key == "YOUR_API_KEY":
          
         print(" Error: URL or API Key is missing in the config file.")
@@ -92,11 +95,13 @@ def save_tasks(tasks, output_dir, project_id):
     print(f"  Saved {len(serializable)} task(s) to '{output_file}'")
     return output_file
 
-def download_images(tasks,api_key,url,output_dir):
+def download_images(tasks,api_key,url,output_dir)-> str:
+    '''Downloads all the Images'''
     
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
     download,skipped = 0,0
+    images_paths = []
     
     for task in tasks:
         image_path = task.data.get("image")
@@ -116,11 +121,12 @@ def download_images(tasks,api_key,url,output_dir):
                 f.write(response.content)
             print(f"Saved: {save_path}")
             download +=1
+            images_paths.append(save_path)
 
         else:
             print(f"Error when Saving")
             skipped +=1
-        
     print(f"downloaded: {download}, skipped: {skipped}")
+    return images_paths
 
 
