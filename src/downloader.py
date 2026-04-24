@@ -28,17 +28,31 @@ def load_picture_conf(file_path="config.yml"):
         print(f" Error: Failed to parse YAML file: {e}")
         sys.exit(1)
 
+def is_valid_json(path):
+    try:
+        with open(path, 'r') as f:
+            json.load(f)
+        return True
+    except (json.JSONDecodeError, FileNotFoundError):
+        return False
+
+
 def load_conf(file_path="config.yml"):
     '''loads config with url,api key,project id, output dir, only completed'''
     try:
         with open(file_path, "r") as f:
             config = yaml.safe_load(f)
         
-        # Using .get() prevents KeyError if a section is missing
+        # Using .get() prevents KeyError if a section is missing(
+        lo_section = config.get('local',{})
         ls_section = config.get('label_studio', {})
         dl_section = config.get('download', {})
 
         return {
+            "local": lo_section.get('local',False),
+            "json_path": lo_section.get('json_path'),
+            "picture_path": lo_section.get('picture_path'),
+
             "url": ls_section.get('url'),
             "api_key": ls_section.get('api_key'),
             "project_id": ls_section.get('project_id'),
@@ -51,6 +65,8 @@ def load_conf(file_path="config.yml"):
     except yaml.YAMLError as e:
         print(f" Error: Failed to parse YAML file: {e}")
         sys.exit(1)
+
+
 
 def connect_label_studio(base_url, api_key, project_id):
     '''Checks if it can connect to label studio'''
@@ -147,3 +163,18 @@ def download_images(tasks,api_key,url,output_dir)-> str:
     return images_paths
 
 
+def get_local_picutrs(path):
+    extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
+    images_paths= [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]
+    if not images_paths:
+        print(f"no Imagesfound in folder {path}")
+        sys.exit(0)
+    return images_paths
+
+def get_local_json(path):
+    if is_valid_json(path):
+        return path
+    else:
+        print(f"not a Valid Path to Json {path}")
+        sys.exit(0)
+        return None
