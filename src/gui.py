@@ -9,7 +9,6 @@ def try_connection(url,api_key,project_id):
         ui.notify(f"Could not connect to Label Studio: {e}", type="negative")
         return False
 
- 
 def set_up_connection(on_start=None):
     setup_conf = load_setup_conf()
     with ui.tabs().classes('w-full') as tabs:
@@ -39,7 +38,6 @@ def set_up_connection(on_start=None):
         save_setup_conf(conf)
         if on_start:
             on_start()
-    #ui.button("Start", on_click=handle_start)
 
 def save_setup_conf(conf: dict, path: str = "config.yml"):
     try:
