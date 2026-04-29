@@ -5,8 +5,6 @@ local:
   picture_path: ""
   #Exact Path for json file
   json_path: ""
-  #where the pictures shoudl be stored
-  output_label_studio:  ""
 
 label_studio:
   # The base URL where your Label Studio instance is running
@@ -20,22 +18,31 @@ label_studio:
   # You can find it in the URL: /projects/<project_id>/
   project_id: 3
 
+
 download:
   # Folder where downloaded images will be saved
   output_dir: "output/"
-
   # Set to true to only download tasks that have been fully annotated/completed
   # Set to false to download all tasks regardless of annotation status
   only_completed: true
 
+output: 
+  # Save path on the Json File if empty old one will be used from Picture
+  # WARNING: UPLOADED PICTURES WILL NOT BE SHOWEN ON LABEL STUDIO IF LEFT EMPTY
+  json_output_path: "/data/local-files/?d=/data-augmentation-with-Label-Stuido-Integration/output/"
+  #where the pictures shoudl be stored
+  output_label_studio:  ""
 brightness:
   #Brigtnesslist
-  brigtness_list: [1.5]
+  brigtness_list: []
   #can used in combination with other formats
   brightness_combination: true
 
 gauss:
-  gauss_list: [1]
+  gauss_list: []
   #can used in combination with other formats
-  guass_combination: true
+  gauss_combination: true
 
+mirrored: 
+  mirrored: true
+  mirrored_combination: true
