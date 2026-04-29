@@ -1,4 +1,3 @@
-
 import yaml
 import sys
 import json
@@ -23,12 +22,19 @@ def load_picture_conf(file_path="config.yml"):
     """Loads picture settings with brightness and gauss."""
     config = load_config(file_path)
     brightness = config.get('brightness', {})
+    mirror = config.get('mirrored',{})
     gauss = config.get('gauss', {})  
+    output = config.get('output')
+
     result=  {
+        "json_output_path":       output.get('json_output_path'),
         "picture_brightness":     brightness.get('brigtness_list'),
         "brightness_combination": brightness.get('brightness_combination'),
         "gauss_strength":         gauss.get('gauss_list'),
         "gauss_combination":      gauss.get('gauss_combination'),
+        "mirrored":               mirror.get('mirrored'),
+        "mirrored_combination":   mirror.get('mirrored_combination')
+
     }
     missing = [k for k, v in result.items() if v is None]
     if missing:
@@ -63,9 +69,6 @@ def load_setup_conf(file_path="config.yml"):
         "output_dir": dl_section.get('output_dir', 'downloads'),
         "only_completed": dl_section.get('only_completed', True)
     }
-  
-
-
 
 def connect_label_studio(base_url, api_key, project_id):
     '''Checks if it can connect to label studio'''
@@ -160,7 +163,6 @@ def download_images(tasks,api_key,url,output_dir)-> str:
             skipped +=1
     print(f"downloaded: {download}, skipped: {skipped}")
     return images_paths
-
 
 def get_local_picutrs(path):
     extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
