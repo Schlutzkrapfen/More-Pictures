@@ -1,6 +1,7 @@
 import yaml
-from nicegui import ui
-from downloader import load_setup_conf,fetch_tasks,load_config, connect_label_studio,save_tasks,download_images
+from nicegui import ui, run
+import asyncio
+from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks,donwload_image
 def try_connection(url,api_key,project_id = 1):
     try:
         client =  connect_label_studio(url,api_key,project_id)
@@ -51,33 +52,52 @@ def download_pictures():
       ui.label("Set to true to only download tasks that have been fully annotated/completed. \n \
             Set to false to download all tasks regardless of annotation status")
       only_completed = ui.checkbox(text="Only annotated",value=setup_conf['only_completed'])
-      def handle_download():
+      async def handle_download(): # 1. Added 'async' keyword
+            print("handle_download called!") 
+            ui.notify("Starting download...", type="positive")
+            
             try:
-                client = connect_label_studio(
+                # Note: If connect_label_studio or fetch_tasks take a long time, 
+                # you should also wrap them in run.io_bound
+                client = await run.io_bound(connect_label_studio, 
                     setup_conf['url'],
                     setup_conf['api_key'],
-                   setup_conf['project_id']
+                    setup_conf['project_id']
                 )
+                
                 if client is None:
                     ui.notify("Connection failed", type="negative")
                     return
 
-                tasks = fetch_tasks(client,  setup_conf['project_id'], only_completed.value)
+                tasks = await run.io_bound(fetch_tasks, client, setup_conf['project_id'], only_completed.value)
+                
                 if not tasks:
-                    ui.notify("No tasks found ", type="negative")
+                    ui.notify("No tasks found", type="negative")
                     return
 
-                save_tasks(tasks, output.value,  setup_conf['project_id'])
-                
-                download_images(tasks, setup_conf['api_key'], setup_conf['url'], output.value)
-                ui.notify("Download complete!", type="positive")
+                await run.io_bound(save_tasks, tasks, output.value, setup_conf['project_id'])
 
+                for task in tasks:
+                    try:
+                        await run.io_bound(donwload_image, task, setup_conf['api_key'], setup_conf['url'], output.value)
+                        
+                        ui.notify(f"Downloaded Picture {task.id}", type="positive")
+                        
+                        
+                    except Exception as e:
+                        ui.notify(f"Download from Picture {task.id} failed: {e}", type="negative")
+                
+                ui.notify("Download complete!", type="positive")
+                
+                await asyncio.sleep(0.1) 
+                ui.navigate.to('/ImageAgumantation')
             except Exception as e:
                 ui.notify(f"Download failed: {e}", type="negative")
 
       ui.button("Download", on_click=handle_download)
       ui.button("Back", on_click=lambda: ui.navigate.to('/'))
     
+@ui.page('/download')
 def change_picturs():
     pass
 

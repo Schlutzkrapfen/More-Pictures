@@ -133,9 +133,28 @@ def save_tasks(tasks, output_dir, project_id):
     return output_file
 
 def donwload_image(task,api_key,url,output_dir):
-    pass
+    image_path = task.data.get("image")
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    if not image_path:
+        raise ValueError("Task has no image field")
+    filename = image_path.split("/")[-1].split("?d=")[-1].split("/")[-1]
+    response = requests.get(
+        f"{url}{image_path}",
+        headers={"Authorization": f"Token {api_key}"}
+    )
+    if response.status_code == 200:
+        save_path = out_path / filename
+        with open(save_path, "wb") as f:
+            f.write(response.content)
+        print(f"Saved: {save_path}")
+        return save_path
+    else:
+        print(f"Error when Saving")
+        raise ConnectionError(f"Failed to download image: {response.status_code} {response.text}")
+
 def download_images(tasks,api_key,url,output_dir)-> str:
-    '''Downloads all the Images and returns their path'''
+    '''Downloads all the Images and returns their path in a Array'''
     
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
