@@ -103,7 +103,7 @@ def fetch_tasks(client, project_id, only_completed=True):
         print(f"  Found {len(all_tasks)} task(s).")
         return all_tasks
     except ApiError as e:
-        print(f"  API Error while fetching tasks (Status {e.status_code}): {e.body}")
+        print(f"  API Error while fetching tasks (Status {e.status_code}): ")
         return []
     except Exception as e:
         print(f"  Unexpected error while fetching tasks: {e}")
@@ -132,6 +132,8 @@ def save_tasks(tasks, output_dir, project_id):
     print(f"  Saved {len(serializable)} task(s) to '{output_file}'")
     return output_file
 
+def donwload_image(task,api_key,url,output_dir):
+    pass
 def download_images(tasks,api_key,url,output_dir)-> str:
     '''Downloads all the Images and returns their path'''
     

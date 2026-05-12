@@ -7,7 +7,7 @@ from ImageTransformer import  ImageTransformer
 from gui import set_up_connection
 
 
-def run_pipeline():
+def run_without_gui():
     conf = load_setup_conf()
     
     if not conf['local']:
@@ -47,9 +47,8 @@ def run_pipeline():
 
     
 
-def main():
-   set_up_connection(on_start=run_pipeline)  
+def main():  
    ui.run()
 if __name__ in {"__main__", "__mp_main__"}:
-    run_pipeline()
-    #main()
+    #run_without_gui()
+    main()
