@@ -1,12 +1,15 @@
 import yaml
 from nicegui import ui, run
 import asyncio
-from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks,donwload_image
+from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks,donwload_image, get_local_picutrs, load_picture_conf
+from ImageTransformer import ImageTransformer
+
+json_path_glob= ""
 def try_connection(url,api_key,project_id = 1):
     try:
         client =  connect_label_studio(url,api_key,project_id)
         if client == None:
-            ui.notify(f"Error one of the Input fields is wrong")
+            ui.notify(f"Error one of the Input fields is wrong", type="negative")
         else:
             ui.navigate.to('/download')
         return True
@@ -21,7 +24,7 @@ def set_up_connection(on_start=None):
     with ui.tabs().classes('w-full') as tabs:
         one = ui.tab('Label Studio')
         two = ui.tab('Locally')
-    with ui.tab_panels(tabs, value=two).classes('w-full'):
+    with ui.tab_panels(tabs, value=one).classes('w-full'):
         with ui.tab_panel(one):
             ui.label("The base URL where your Label Studio instance is running")
             i = ui.input(value=setup_conf['url']).props('clearable')
@@ -42,23 +45,17 @@ def set_up_connection(on_start=None):
    
 @ui.page('/download')
 def download_pictures():
-        
       setup_conf = load_setup_conf()
-
       ui.label(f"Connected to: {setup_conf['url']}, project id: {setup_conf['project_id']}")
-      #project_id = ui.number(value=setup_conf['project_id'])
       ui.label("Folder where downloaded images will be saved")
       output = ui.input(value=setup_conf['output_dir']).props('clearable')
       ui.label("Set to true to only download tasks that have been fully annotated/completed. \n \
             Set to false to download all tasks regardless of annotation status")
       only_completed = ui.checkbox(text="Only annotated",value=setup_conf['only_completed'])
-      async def handle_download(): # 1. Added 'async' keyword
+      async def handle_download(): 
             print("handle_download called!") 
             ui.notify("Starting download...", type="positive")
-            
             try:
-                # Note: If connect_label_studio or fetch_tasks take a long time, 
-                # you should also wrap them in run.io_bound
                 client = await run.io_bound(connect_label_studio, 
                     setup_conf['url'],
                     setup_conf['api_key'],
@@ -80,7 +77,6 @@ def download_pictures():
                 for task in tasks:
                     try:
                         await run.io_bound(donwload_image, task, setup_conf['api_key'], setup_conf['url'], output.value)
-                        
                         ui.notify(f"Downloaded Picture {task.id}", type="positive")
                         
                         
@@ -89,7 +85,7 @@ def download_pictures():
                 
                 ui.notify("Download complete!", type="positive")
                 
-                await asyncio.sleep(0.1) 
+                await asyncio.sleep(0.5) 
                 ui.navigate.to('/ImageAgumantation')
             except Exception as e:
                 ui.notify(f"Download failed: {e}", type="negative")
@@ -97,8 +93,46 @@ def download_pictures():
       ui.button("Download", on_click=handle_download)
       ui.button("Back", on_click=lambda: ui.navigate.to('/'))
     
-@ui.page('/download')
+@ui.page('/ImageAgumantation')
 def change_picturs():
+    setup_conf = load_setup_conf()
+    picture_conf = load_picture_conf()
+    pictures = get_local_picutrs(setup_conf['output_dir'])
+    client =  run.io_bound(connect_label_studio, 
+                    setup_conf['url'],
+                    setup_conf['api_key'],
+                    setup_conf['project_id']
+                )
+    tasks =  run.io_bound(fetch_tasks, client, setup_conf['project_id'],setup_conf['only_completed'])
+    json_path =  run.io_bound(save_tasks, tasks, setup_conf['output_dir'], setup_conf['project_id'])
+    transformer = ImageTransformer(pictures,json_path,setup_conf['output_dir'])
+    ui.image(pictures[0])
+    img = ui.image(pictures[0])
+    if picture_conf['mirrored']:
+        img.set_source(transformer.mirror(pictures[0]))
+        img.set_visibility(True)
+    else:
+        img.set_visibility(False)
+    async def show_output(e):
+        if e.value:
+            mirrored = transformer.mirror(pictures[0])
+            img.set_source(mirrored)
+            img.set_visibility(True)
+        else:
+            img.set_visibility(False)
+
+
+    ui.label("What do you want to change: ")
+    ui.checkbox(text="Mirrored",value=picture_conf['mirrored'], on_change=show_output) 
+
+    async def change_pictures(): 
+        pass
+        
+    
+
+
+    ui.button("Use it on all Pictures", on_click=change_pictures)
+
     pass
 
 def save_setup_conf(conf: dict, path: str = "config.yml"):

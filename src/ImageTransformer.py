@@ -63,6 +63,20 @@ class ImageTransformer:
         print("   added the task to the json")
 
     # --- Core transform engine ---
+    def _apply_transform_to_single(self,suffix,transform_fn,path,label_fn=None):
+        """Base helper: open one image, apply transform_fn,!label doesen't get saved."""
+        if label_fn is None:
+            label_fn = self.add_labels 
+
+        saved_paths = []
+        name, ext = os.path.splitext(path)
+        new_filepath = f"{name}-{suffix}{ext}"
+        with Image.open(path) as img:
+            result = transform_fn(img)
+            result.save(new_filepath)
+        saved_paths =new_filepath 
+        print(f"  Saved: {os.path.basename(new_filepath)}")
+        return saved_paths
 
     def _apply_transform(self, suffix, transform_fn, label_fn=None):
         """Base helper: open each image, apply transform_fn, save, and label."""
@@ -102,5 +116,13 @@ class ImageTransformer:
         return self._apply_transform(
             suffix="mirrored",
             transform_fn=ImageOps.mirror,
+            label_fn=self.change_mirror_labels
+        )
+    def mirror(self,path):
+        '''Mirror a single image with a path'''
+        return self._apply_transform_to_single( 
+            suffix="mirrored",
+            transform_fn=ImageOps.mirror,
+            path = path,
             label_fn=self.change_mirror_labels
         )
