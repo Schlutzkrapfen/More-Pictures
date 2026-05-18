@@ -21,7 +21,7 @@ def try_connection(url,api_key,project_id = 1):
         return False
 
 @ui.page('/')
-def set_up_connection(on_start=None):
+def set_up_connection():
     '''Tests if the connection can be set up'''
     setup_conf = load_setup_conf()
     with ui.tabs().classes('w-full') as tabs:
@@ -120,31 +120,39 @@ def change_picturs():
         else:
             img.set_visibility(False)
 
-    def add_chip():
-        with chips:
-            ui.chip(label_input.value, icon='label', color='silver', removable=True)
-        label_input.value = ''
-    label_input = ui.input('Add label').on('keydown.enter', add_chip)
-    with label_input.add_slot('append'):
-        ui.button(icon='add', on_click=add_chip).props('round dense flat')
+    brightness_values = []
+    image_row = ui.row()
 
-    with ui.row().classes('gap-0') as chips:
-        ui.chip('Label 1', icon='label', color='silver', removable=True)
+    def add_brightness():
+        val = brightness_input.value
+        if val is None:
+            return
+        brightness_values.append(val)
+        refresh_previews()
 
-    ui.button('Restore removed chips', icon='unarchive',
-            on_click=lambda: [chip.set_value(True) for chip in chips]) \
-        .props('flat')
+    def refresh_previews():
+        image_row.clear()
+        with image_row:
+            for val in brightness_values:
+                with ui.column():
+                    ui.image(transformer.adjust_brightness(pictures[0], val))
+                    ui.label(f"Brightness: {val}")
+                    ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
+
+    def remove_brightness(val):
+        brightness_values.remove(val)
+        refresh_previews()
+
+    brightness_input = ui.number('Brightness value')
+    ui.button('Add', icon='add', on_click=add_brightness)
+    image_row = ui.row()
 
 
     ui.label("What do you want to change: ")
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'], on_change=show_output) 
-
     async def change_pictures(): 
         pass
-        
-    
     ui.button("Use it on all Pictures", on_click=change_pictures)
-
     pass
 
 def save_setup_conf(url = None,api_key= None,project_id = None,dow_output =None , conf: dict =None,  path: str = "config.yml"):

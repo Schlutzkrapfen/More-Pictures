@@ -103,12 +103,20 @@ class ImageTransformer:
             suffix=f"brit-{factor}",
             transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor)
         )
+    def adjust_brightness(self,path, factor=1.5):
+        """Adjust the brightness of the image."""
+        return self._apply_transform_to_single(
+            suffix=f"brit-{factor}",
+            transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor),
+            path=path
 
+        )
     def add_gaussian_filter(self, strength=1):
         """Adds a Gaussian filter to the image."""
         return self._apply_transform(
             suffix=f"gaus-{strength}",
             transform_fn=lambda img: img.filter(ImageFilter.GaussianBlur(radius=strength))
+            
         )
 
     def mirror(self):
