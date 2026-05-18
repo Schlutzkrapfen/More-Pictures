@@ -9,8 +9,11 @@ def try_connection(url,api_key,project_id = 1):
     try:
         client =  connect_label_studio(url,api_key,project_id)
         if client == None:
+
             ui.notify(f"Error one of the Input fields is wrong", type="negative")
         else:
+            
+            save_setup_conf(url=url,api_key=api_key,project_id=project_id)
             ui.navigate.to('/download')
         return True
     except Exception as e:
@@ -41,8 +44,12 @@ def set_up_connection(on_start=None):
         with ui.tab_panel(two):
             ui.label('Local is under construction')
     
+def dump_yml(data):
+    yaml_string = yaml.dump(data, default_flow_style=False, indent=4, width=80)
+    print(yaml_string)
+    with open('data.yaml', 'w') as file:
+        yaml.dump(data, file, default_flow_style=False, indent=4)
 
-   
 @ui.page('/download')
 def download_pictures():
       setup_conf = load_setup_conf()
@@ -61,30 +68,21 @@ def download_pictures():
                     setup_conf['api_key'],
                     setup_conf['project_id']
                 )
-                
                 if client is None:
                     ui.notify("Connection failed", type="negative")
                     return
-
                 tasks = await run.io_bound(fetch_tasks, client, setup_conf['project_id'], only_completed.value)
-                
                 if not tasks:
                     ui.notify("No tasks found", type="negative")
                     return
-
                 await run.io_bound(save_tasks, tasks, output.value, setup_conf['project_id'])
-
                 for task in tasks:
                     try:
                         await run.io_bound(donwload_image, task, setup_conf['api_key'], setup_conf['url'], output.value)
                         ui.notify(f"Downloaded Picture {task.id}", type="positive")
-                        
-                        
                     except Exception as e:
                         ui.notify(f"Download from Picture {task.id} failed: {e}", type="negative")
-                
                 ui.notify("Download complete!", type="positive")
-                
                 await asyncio.sleep(0.5) 
                 ui.navigate.to('/ImageAgumantation')
             except Exception as e:
@@ -108,6 +106,7 @@ def change_picturs():
     transformer = ImageTransformer(pictures,json_path,setup_conf['output_dir'])
     ui.image(pictures[0])
     img = ui.image(pictures[0])
+    #brit = ui.image(pictures[0])
     if picture_conf['mirrored']:
         img.set_source(transformer.mirror(pictures[0]))
         img.set_visibility(True)
@@ -121,6 +120,21 @@ def change_picturs():
         else:
             img.set_visibility(False)
 
+    def add_chip():
+        with chips:
+            ui.chip(label_input.value, icon='label', color='silver', removable=True)
+        label_input.value = ''
+    label_input = ui.input('Add label').on('keydown.enter', add_chip)
+    with label_input.add_slot('append'):
+        ui.button(icon='add', on_click=add_chip).props('round dense flat')
+
+    with ui.row().classes('gap-0') as chips:
+        ui.chip('Label 1', icon='label', color='silver', removable=True)
+
+    ui.button('Restore removed chips', icon='unarchive',
+            on_click=lambda: [chip.set_value(True) for chip in chips]) \
+        .props('flat')
+
 
     ui.label("What do you want to change: ")
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'], on_change=show_output) 
@@ -129,16 +143,31 @@ def change_picturs():
         pass
         
     
-
-
     ui.button("Use it on all Pictures", on_click=change_pictures)
 
     pass
 
-def save_setup_conf(conf: dict, path: str = "config.yml"):
+def save_setup_conf(url = None,api_key= None,project_id = None,dow_output =None , conf: dict =None,  path: str = "config.yml"):
     try:
-        with open(path, 'w') as f:
-            yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
+        if conf != None:
+            with open(path, 'w') as f:
+                yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
+        
+
+        with open(path, "r") as f:
+            config = yaml.safe_load(f)
+        if url != None:
+            config['label_studio']['url'] = url
+        if api_key != None:
+            config['label_studio']['api_key'] = api_key
+        if project_id != None:
+            config['label_studio']['project_id'] = project_id
+        if dow_output != None:
+            config['donwload']['output_dir'] = dow_output
+
+        with open(path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
         print("Save worked")
     except Exception as e:
         print(f"Save failed: {e}")
+    
