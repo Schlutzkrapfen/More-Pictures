@@ -4,6 +4,7 @@ from nicegui import ui, run
 import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
+from image_stats_enum import ImageStat, PictureEntry
 @ui.page('/ImageAgumantation')
 def change_picturs():
     setup_conf = load_setup_conf()
@@ -20,37 +21,39 @@ def change_picturs():
    
     ui.label("What do you want to change: ")
 
-    brightness_values = []
-    image_row = ui.row()
+    pictures_stats = [PictureEntry()]
+    
 
-    main_imag = ui.image(pictures[0])
-    main_imag.set_visibility(True)
     mirrow = ui.checkbox(text="Mirrored",value=picture_conf['mirrored']) 
+    image_row = ui.row()
     if mirrow:
-        with ui.column() as image_row:
-            img = ui.image(pictures[0])
-            img.set_source(transformer.mirror(pictures[0]))
-    else:
-        image_row = None
+        pictures_stats.append(PictureEntry(mirrored=True))
+   
     
     def add_brightness():
         val = brightness_input.value
         if val is None:
             return
-        brightness_values.append(val)
+        
+        pictures_stats.append(PictureEntry(brightness=val))
         refresh_previews()
 
     def refresh_previews():
+        image_row.clear()
         with image_row:
-            for val in brightness_values:
+            for img in pictures_stats:
+                val = img.brightness
                 with ui.grid(columns=5):
-                    ui.image(transformer.adjust_brightness(pictures[0], val))
+                    image =  transformer.adjust_brightness(pictures[0], val)
+                    if img.mirrored:
+                        image = transformer.mirror(image)
+                    ui.image(image)
                     ui.label(f"Brightness: {val}")
-                    ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
+                    #ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
 
-    def remove_brightness(val):
-        brightness_values.remove(val)
-        refresh_previews()
+   # def remove_brightness(val):
+   #     brightness_values.remove(val)
+   #     refresh_previews()
 
     brightness_input = ui.number('Brightness value')
     ui.button('Add', icon='add', on_click=add_brightness)

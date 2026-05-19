@@ -20,8 +20,8 @@ def download_pictures():
 
     async def handle_download(): 
             print("handle_download called!") 
-            ui.notify("Starting download...", type="positive")
             project_id = int(project_id_number.value)
+            ui.notify(f"Starting download from Project {project_id}", type="positive")
             try:
                 client = await run.io_bound(connect_label_studio, 
                     setup_conf['url'],

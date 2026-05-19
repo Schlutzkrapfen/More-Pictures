@@ -34,9 +34,12 @@ def set_up_connection():
             ui.label("Your API key — either a Personal Access Token (PAT) or legacy access token")
             d = ui.input(value=setup_conf['api_key'],password=True).props('clearable')
            
+            ui.label("The numeric ID of the project you want to download images from")
+            project_id_number =ui.number(value=setup_conf['project_id'])
             ui.button("Start", on_click=lambda: try_connection(
                 i.value,
-                d.value
+                d.value,
+                int(project_id_number.value)
             ))
         with ui.tab_panel(two):
             ui.label('Local is under construction')
