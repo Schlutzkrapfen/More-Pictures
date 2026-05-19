@@ -1,2 +1,50 @@
 # data-augmentation-with-Label-Stuido-Integration
 Python script that downloads images from a Label Studio project via the API and applies image transformations for data augmentation.
+
+##  Installation
+
+### 1. Clone the Repository
+Open your terminal and run:
+```bash
+git clone https://github.com/Schlutzkrapfen/Dignocat-to-LabelStudio-Converter.git
+cd Dignocat-to-LabelStudio-Converter
+```
+
+
+### 2. Install Dependencies
+Install the required Python libraries using the requirements.txt file:
+#### On Linux/macOS:
+
+
+Bash
+```bash
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+
+```
+#### On Windows:
+Bash
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate it
+.\venv\Scripts\activate
+
+# Install requirements
+pip install -r requirements.txt
+
+```
+## Usage
+
+Once the setup is complete, start the script:
+Bash
+```bash
+python main.py
+```
