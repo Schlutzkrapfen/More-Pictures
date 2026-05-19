@@ -16,7 +16,7 @@ Install the required Python libraries using the requirements.txt file:
 #### On Linux/macOS:
 
 
-Bash
+
 ```bash
 # Create a virtual environment
 python3 -m venv venv
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ```
 #### On Windows:
-Bash
+
 ```bash
 # Create a virtual environment
 python -m venv venv
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 ## Usage
 
 Once the setup is complete, start the script:
-Bash
+
 ```bash
 python main.py
 ```
