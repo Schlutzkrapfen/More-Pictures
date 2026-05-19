@@ -3,6 +3,7 @@ import sys
 import socket
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 import download_page
+import augumantation_page
 from nicegui import ui
 from downloader import load_setup_conf,connect_label_studio,fetch_tasks,save_tasks,download_images,load_picture_conf,get_local_json,get_local_picutrs
 from ImageTransformer import  ImageTransformer
