@@ -52,7 +52,7 @@ def find_free_port():
         return s.getsockname()[1]    
 
 def main():  
-   ui.run(find_free_port())
+   ui.run(port=find_free_port())
 if __name__ in {"__main__", "__mp_main__"}:
     #run_without_gui()
     main()
