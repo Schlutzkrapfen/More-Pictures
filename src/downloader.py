@@ -5,6 +5,7 @@ import requests
 from pathlib import Path
 from label_studio_sdk import LabelStudio
 from label_studio_sdk.core import ApiError
+from yml_creator import generate_default_config
 
 def load_config(file_path="config.yml"):
     """Loads and returns the full config dict."""
@@ -13,10 +14,17 @@ def load_config(file_path="config.yml"):
             return yaml.safe_load(f)
     except FileNotFoundError:
         print(f"Error: The file '{file_path}' was not found.")
-        sys.exit(1)
     except yaml.YAMLError as e:
         print(f"Error: Failed to parse YAML file: {e}")
-        sys.exit(1)
+    generate_default_config()
+    try:
+        with open(file_path, "r") as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+    except yaml.YAMLError as e:
+        print(f"Error: Failed to parse YAML file: {e}")
+    
 
 def load_picture_conf(file_path="config.yml"):
     """Loads picture settings with brightness and gauss."""
@@ -133,6 +141,7 @@ def save_tasks(tasks, output_dir, project_id):
     return output_file
 
 def donwload_image(task,api_key,url,output_dir):
+    '''downloads a single Image and returns path'''
     image_path = task.data.get("image")
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -186,6 +195,7 @@ def download_images(tasks,api_key,url,output_dir)-> str:
     return images_paths
 
 def get_local_picutrs(path):
+    '''Gets the all the pictures that are stored in the folder that you give'''
     extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
     images_paths= [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]
     if not images_paths:
@@ -194,6 +204,7 @@ def get_local_picutrs(path):
     return images_paths
 
 def get_local_json(path):
+    '''gets local json needs exact path'''
     if is_valid_json(path):
         return path
     else:

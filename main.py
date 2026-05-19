@@ -2,14 +2,19 @@ import os
 import sys
 import socket
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
+import download_page
 from nicegui import ui
 from downloader import load_setup_conf,connect_label_studio,fetch_tasks,save_tasks,download_images,load_picture_conf,get_local_json,get_local_picutrs
 from ImageTransformer import  ImageTransformer
-from gui import set_up_connection
+from start_page import set_up_connection
+
 
 
 def run_without_gui():
     conf = load_setup_conf()
+    if conf == None:
+        print("Critical Error")
+        sys.exit(1)
     
     if not conf['local']:
         client = connect_label_studio(
@@ -43,8 +48,6 @@ def run_without_gui():
     if brightness_combination and conf["gauss_combination"]:
         for strength in conf["gauss_strength"]:
             transformer.add_gaussian_filter(strength)
-    #if brightness_combination and conf['']:
-    #    pass
 
 def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

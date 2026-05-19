@@ -50,46 +50,6 @@ def dump_yml(data):
     with open('data.yaml', 'w') as file:
         yaml.dump(data, file, default_flow_style=False, indent=4)
 
-@ui.page('/download')
-def download_pictures():
-      setup_conf = load_setup_conf()
-      ui.label(f"Connected to: {setup_conf['url']}, project id: {setup_conf['project_id']}")
-      ui.label("Folder where downloaded images will be saved")
-      output = ui.input(value=setup_conf['output_dir']).props('clearable')
-      ui.label("Set to true to only download tasks that have been fully annotated/completed. \n \
-            Set to false to download all tasks regardless of annotation status")
-      only_completed = ui.checkbox(text="Only annotated",value=setup_conf['only_completed'])
-      async def handle_download(): 
-            print("handle_download called!") 
-            ui.notify("Starting download...", type="positive")
-            try:
-                client = await run.io_bound(connect_label_studio, 
-                    setup_conf['url'],
-                    setup_conf['api_key'],
-                    setup_conf['project_id']
-                )
-                if client is None:
-                    ui.notify("Connection failed", type="negative")
-                    return
-                tasks = await run.io_bound(fetch_tasks, client, setup_conf['project_id'], only_completed.value)
-                if not tasks:
-                    ui.notify("No tasks found", type="negative")
-                    return
-                await run.io_bound(save_tasks, tasks, output.value, setup_conf['project_id'])
-                for task in tasks:
-                    try:
-                        await run.io_bound(donwload_image, task, setup_conf['api_key'], setup_conf['url'], output.value)
-                        ui.notify(f"Downloaded Picture {task.id}", type="positive")
-                    except Exception as e:
-                        ui.notify(f"Download from Picture {task.id} failed: {e}", type="negative")
-                ui.notify("Download complete!", type="positive")
-                await asyncio.sleep(0.5) 
-                ui.navigate.to('/ImageAgumantation')
-            except Exception as e:
-                ui.notify(f"Download failed: {e}", type="negative")
-
-      ui.button("Download", on_click=handle_download)
-      ui.button("Back", on_click=lambda: ui.navigate.to('/'))
     
 @ui.page('/ImageAgumantation')
 def change_picturs():
@@ -104,25 +64,22 @@ def change_picturs():
     tasks =  run.io_bound(fetch_tasks, client, setup_conf['project_id'],setup_conf['only_completed'])
     json_path =  run.io_bound(save_tasks, tasks, setup_conf['output_dir'], setup_conf['project_id'])
     transformer = ImageTransformer(pictures,json_path,setup_conf['output_dir'])
-    ui.image(pictures[0])
-    img = ui.image(pictures[0])
-    #brit = ui.image(pictures[0])
-    if picture_conf['mirrored']:
-        img.set_source(transformer.mirror(pictures[0]))
-        img.set_visibility(True)
-    else:
-        img.set_visibility(False)
-    async def show_output(e):
-        if e.value:
-            mirrored = transformer.mirror(pictures[0])
-            img.set_source(mirrored)
-            img.set_visibility(True)
-        else:
-            img.set_visibility(False)
+   
+    ui.label("What do you want to change: ")
 
     brightness_values = []
     image_row = ui.row()
 
+    main_imag = ui.image(pictures[0])
+    main_imag.set_visibility(True)
+    mirrow = ui.checkbox(text="Mirrored",value=picture_conf['mirrored']) 
+    if mirrow:
+        with ui.column() as image_row:
+            img = ui.image(pictures[0])
+            img.set_source(transformer.mirror(pictures[0]))
+    else:
+        image_row = None
+    
     def add_brightness():
         val = brightness_input.value
         if val is None:
@@ -131,10 +88,9 @@ def change_picturs():
         refresh_previews()
 
     def refresh_previews():
-        image_row.clear()
         with image_row:
             for val in brightness_values:
-                with ui.column():
+                with ui.grid(columns=5):
                     ui.image(transformer.adjust_brightness(pictures[0], val))
                     ui.label(f"Brightness: {val}")
                     ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
@@ -145,11 +101,8 @@ def change_picturs():
 
     brightness_input = ui.number('Brightness value')
     ui.button('Add', icon='add', on_click=add_brightness)
-    image_row = ui.row()
 
 
-    ui.label("What do you want to change: ")
-    ui.checkbox(text="Mirrored",value=picture_conf['mirrored'], on_change=show_output) 
     async def change_pictures(): 
         pass
     ui.button("Use it on all Pictures", on_click=change_pictures)
