@@ -1,5 +1,6 @@
 import os
 import sys
+import socket
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 from nicegui import ui
 from downloader import load_setup_conf,connect_label_studio,fetch_tasks,save_tasks,download_images,load_picture_conf,get_local_json,get_local_picutrs
@@ -45,10 +46,13 @@ def run_without_gui():
     #if brightness_combination and conf['']:
     #    pass
 
-    
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]    
 
 def main():  
-   ui.run()
+   ui.run(find_free_port)
 if __name__ in {"__main__", "__mp_main__"}:
     #run_without_gui()
     main()
