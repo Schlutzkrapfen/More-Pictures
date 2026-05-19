@@ -92,7 +92,7 @@ def connect_label_studio(base_url, api_key, project_id):
         return client
 
     except ApiError as e:
-        print(f" Label Studio API Error (Status {e.status_code}): {e.body}")
+        print(f" Label Studio API Error (Status {e.status_code}) ")
     except Exception as e:
         print(f" Unexpected Connection Error: {e}")
     

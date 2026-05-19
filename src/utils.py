@@ -1,4 +1,6 @@
-def save_setup_conf(url = None,api_key= None,project_id = None,dow_output =None , conf: dict =None,  path: str = "config.yml"):
+import yaml
+def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =None , conf: dict =None,  path: str = "config.yml"):
+    '''saves everything to a yml if let empty the part of the yml will not be changed'''
     try:
         if conf != None:
             with open(path, 'w') as f:

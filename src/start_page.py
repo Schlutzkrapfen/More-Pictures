@@ -7,13 +7,13 @@ from utils import save_setup_conf
 json_path_glob= ""
 def try_connection(url,api_key,project_id = 1):
     try:
-        client =  connect_label_studio(url,api_key,project_id)
+        client =  connect_label_studio(url,api_key,int(project_id))
         if client == None:
 
             ui.notify(f"Error one of the Input fields is wrong", type="negative")
         else:
             
-            save_setup_conf(url=url,api_key=api_key,project_id=project_id)
+            save_setup_conf(url=url,api_key=api_key,project_id=int(project_id))
             ui.navigate.to('/download')
         return True
     except Exception as e:
@@ -34,12 +34,9 @@ def set_up_connection():
             ui.label("Your API key — either a Personal Access Token (PAT) or legacy access token")
             d = ui.input(value=setup_conf['api_key'],password=True).props('clearable')
            
-            ui.label("The numeric ID of the project you want to download images from")
-            project_id = ui.number(value=setup_conf['project_id'])
             ui.button("Start", on_click=lambda: try_connection(
                 i.value,
-                d.value,
-                project_id.value
+                d.value
             ))
         with ui.tab_panel(two):
             ui.label('Local is under construction')
