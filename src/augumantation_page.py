@@ -23,21 +23,7 @@ def change_picturs():
 
     pictures_stats = [PictureEntry()]
     
-
-    mirrow = ui.checkbox(text="Mirrored",value=picture_conf['mirrored']) 
     image_row = ui.row()
-    if mirrow:
-        pictures_stats.append(PictureEntry(mirrored=True))
-   
-    
-    def add_brightness():
-        val = brightness_input.value
-        if val is None:
-            return
-        
-        pictures_stats.append(PictureEntry(brightness=val))
-        refresh_previews()
-
     def refresh_previews():
         image_row.clear()
         with image_row:
@@ -51,13 +37,35 @@ def change_picturs():
                     ui.label(f"Brightness: {val}")
                     #ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
 
+    def change_mirror(mirror):
+        if mirror:
+            pictures_stats.append(PictureEntry(mirrored=True))
+        else:
+            remove_list = []
+            for picturers in  pictures_stats:
+                if picturers.mirrored == True:
+                    remove_list.append(picturers)
+            for picture in remove_list:
+                pictures_stats.remove(picture)
+        refresh_previews()
+
+    ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
+
+   
+    
+    def add_brightness():
+        val = brightness_input.value
+        if val is None:
+            return
+        
+        pictures_stats.append(PictureEntry(brightness=val))
+        refresh_previews()
+
+   
+
    # def remove_brightness(val):
    #     brightness_values.remove(val)
    #     refresh_previews()
-
-    brightness_input = ui.number('Brightness value')
-    ui.button('Add', icon='add', on_click=add_brightness)
-
     async def change_pictures(): 
         image_row.clear()
         with image_row:
@@ -67,7 +75,11 @@ def change_picturs():
                     image =  transformer.adjust_brightness(pic, val)
                     if img.mirrored:
                         image = transformer.mirror(image)
-                    
+
+    brightness_input = ui.number('Brightness value')
+    ui.button('Add', icon='add', on_click=add_brightness)
+
+                   
     ui.timer(0, refresh_previews, once=True)
     ui.button("Use it on all Pictures", on_click=change_pictures)
     pass
