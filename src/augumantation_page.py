@@ -4,7 +4,7 @@ from nicegui import ui, run
 import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
-from image_stats import  PictureEntry
+from image_stats import  PictureEntry,ImageEnum
 from utils import save_augumatiaion_conf
 @ui.page('/ImageAgumantation')
 def change_picturs():
@@ -39,9 +39,24 @@ def change_picturs():
                     ui.label(f"Brightness: {val}")
                     ui.button(icon='delete', on_click=lambda v=i: remove_picture(v)).props('flat round dense')
 
+    def update_combination(index:ImageEnum,value:bool):
+        '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
+        print(index)
+        if value == False:
+            return
+        for i ,picture_enums in enumerate(picture_conf['mirrored_combination']):
+                if  i == index.value[0] and picture_enums == True:
+                    for picture in pictures_stats:
+                        if picture.brightness != 1:
+                            pictures_stats.append(PictureEntry(mirror = True,brightness=picture.brightness,gaus=picture.gaus))
+        refresh_previews()
+          
+        
     def change_mirror(mirror):
+        '''Adds Mirrror images for the pictures'''
         if mirror:
             pictures_stats.append(PictureEntry(mirrored=True))
+                    
         else:
             remove_list = []
             for picturers in  pictures_stats:
@@ -51,25 +66,33 @@ def change_picturs():
                 pictures_stats.remove(picture)
         refresh_previews()
         save_augumatiaion_conf(mirror=mirror)
+        
 
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
+    with ui.dropdown_button('Combine with'):
+        ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e))
 
-   
-    
     def add_brightness():
+        '''adds Brigthness for the picuteres with a value '''
         val = brightness_input.value
         if val is None:
             return
-        
         pictures_stats.append(PictureEntry(brightness=val))
+        brightness_values = []
+        for picture in pictures_stats:
+            if picture.brightness != 1 and picture.brightness not in brightness_values:
+                brightness_values.append(picture.brightness)
+        save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
 
    
     def startup():
+        '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
         change_pictures()
 
     def remove_picture(index:int):
+        '''removes the pictures from the page at a Index'''
         pictures_stats.pop(index)
         refresh_previews()
     async def change_pictures(): 

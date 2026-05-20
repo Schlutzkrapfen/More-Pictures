@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass 
 
-class ImageStat(Enum):
+class ImageEnum(Enum):
     Brightness = 0,
     Gaus = 1,
     Mirrored = 2,
