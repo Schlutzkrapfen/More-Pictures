@@ -4,7 +4,7 @@ from nicegui import ui, run
 import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
-from image_stats_enum import ImageStat, PictureEntry
+from image_stats_enum import  PictureEntry
 @ui.page('/ImageAgumantation')
 def change_picturs():
     setup_conf = load_setup_conf()
@@ -58,9 +58,17 @@ def change_picturs():
     brightness_input = ui.number('Brightness value')
     ui.button('Add', icon='add', on_click=add_brightness)
 
-
     async def change_pictures(): 
-        pass
+        image_row.clear()
+        with image_row:
+            for img in pictures_stats:
+                for pic in pictures:
+                    val = img.brightness
+                    image =  transformer.adjust_brightness(pic, val)
+                    if img.mirrored:
+                        image = transformer.mirror(image)
+                    
+    ui.timer(0, refresh_previews, once=True)
     ui.button("Use it on all Pictures", on_click=change_pictures)
     pass
 

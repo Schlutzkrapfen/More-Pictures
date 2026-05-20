@@ -38,20 +38,20 @@ DEFAULT_CONFIG = {
     "brightness": {
         # List of brightness factors to apply, e.g. [0.5, 1.5]
         "brigtness_list": [],
-        # If True, brightness can be combined with other augmentations
-        "brightness_combination": True,
+        # If True, brightness can be combined with other augmentations. (See ImageStatEnum how the )
+        "brightness_combination": [False,False,False],
     },
     "gauss": {
         # List of Gaussian blur kernel sizes to apply, e.g. [3, 5]
         "gauss_list": [],
         # If True, Gaussian blur can be combined with other augmentations
-        "gauss_combination": True,
+        "gauss_combination": [False,False,False],
     },
     "mirrored": {
         # If True, mirrored versions of images will be generated
         "mirrored": True,
         # If True, mirroring can be combined with other augmentations
-        "mirrored_combination": True,
+        "mirrored_combination": [False, False, False],
     },
 }
 def generate_default_config(output_path: str = "config.yml") :

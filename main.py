@@ -9,8 +9,6 @@ from downloader import load_setup_conf,connect_label_studio,fetch_tasks,save_tas
 from ImageTransformer import  ImageTransformer
 from start_page import set_up_connection
 
-
-
 def run_without_gui():
     conf = load_setup_conf()
     if conf == None:
