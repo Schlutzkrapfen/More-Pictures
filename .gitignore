@@ -426,4 +426,5 @@ config.yaml
 
 #output
 output/*
+src/output/*
 
