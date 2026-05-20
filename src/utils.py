@@ -23,3 +23,22 @@ def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =N
         print("Save worked")
     except Exception as e:
         print(f"Save failed: {e}")
+
+def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,  path: str = "config.yml"):
+    '''saves everything for the picuter fiels to a yml if let empty the part of the yml will not be changed'''
+    try:
+        if conf != None:
+            with open(path, 'w') as f:
+                yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
+        
+
+        with open(path, "r") as f:
+            config = yaml.safe_load(f)
+        if mirror != None:
+            config['mirrored']['mirrored'] = mirror
+        
+        with open(path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        print("Save worked")
+    except Exception as e:
+        print(f"Save failed: {e}")

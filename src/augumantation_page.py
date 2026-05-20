@@ -4,7 +4,8 @@ from nicegui import ui, run
 import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
-from image_stats_enum import  PictureEntry
+from image_stats import  PictureEntry
+from utils import save_augumatiaion_conf
 @ui.page('/ImageAgumantation')
 def change_picturs():
     setup_conf = load_setup_conf()
@@ -27,7 +28,8 @@ def change_picturs():
     def refresh_previews():
         image_row.clear()
         with image_row:
-            for img in pictures_stats:
+            for i,img in enumerate(pictures_stats):
+
                 val = img.brightness
                 with ui.grid(columns=5):
                     image =  transformer.adjust_brightness(pictures[0], val)
@@ -35,7 +37,7 @@ def change_picturs():
                         image = transformer.mirror(image)
                     ui.image(image)
                     ui.label(f"Brightness: {val}")
-                    #ui.button(icon='delete', on_click=lambda v=val: remove_brightness(v)).props('flat round dense')
+                    ui.button(icon='delete', on_click=lambda v=i: remove_picture(v)).props('flat round dense')
 
     def change_mirror(mirror):
         if mirror:
@@ -48,6 +50,7 @@ def change_picturs():
             for picture in remove_list:
                 pictures_stats.remove(picture)
         refresh_previews()
+        save_augumatiaion_conf(mirror=mirror)
 
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
 
@@ -62,10 +65,13 @@ def change_picturs():
         refresh_previews()
 
    
+    def startup():
+        change_mirror(picture_conf['mirrored'])
+        change_pictures()
 
-   # def remove_brightness(val):
-   #     brightness_values.remove(val)
-   #     refresh_previews()
+    def remove_picture(index:int):
+        pictures_stats.pop(index)
+        refresh_previews()
     async def change_pictures(): 
         image_row.clear()
         with image_row:
@@ -80,7 +86,7 @@ def change_picturs():
     ui.button('Add', icon='add', on_click=add_brightness)
 
                    
-    ui.timer(0, refresh_previews, once=True)
+    ui.timer(0, startup, once=True)
     ui.button("Use it on all Pictures", on_click=change_pictures)
     pass
 
