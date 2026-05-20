@@ -47,10 +47,14 @@ def change_picturs():
         if index.value[0] >= len(picture_conf['mirrored_combination']):
             return
 
+        brightness_values = []
+        for pic in pictures_stats:
+            if pic.mirrored:
+                brightness_values.append(pic.brightness)
         save_pictures = [
             PictureEntry(mirrored=True, brightness=p.brightness, gaus=p.gaus)
             for p in pictures_stats
-            if p.brightness != 1 and not p.mirrored
+            if p.brightness not in brightness_values and p.brightness != 1
        ]
 
         pictures_stats.extend(save_pictures)
