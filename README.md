@@ -6,7 +6,7 @@ Python script that downloads images from a Label Studio project via the API and 
 ### 1. Clone the Repository
 Open your terminal and run:
 ```bash
-git clone https://github.com/Schlutzkrapfen/Dignocat-to-LabelStudio-Converter.git
+git clone https://github.com/Schlutzkrapfen/More-Pictures.git
 cd Dignocat-to-LabelStudio-Converter
 ```
 
