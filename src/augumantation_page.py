@@ -41,16 +41,23 @@ def change_picturs():
 
     def update_combination(index:ImageEnum,value:bool):
         '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
-        print(index)
-        if value == False:
+        if not value:
             return
-        for i ,picture_enums in enumerate(picture_conf['mirrored_combination']):
-                if  i == index.value[0] and picture_enums == True:
-                    for picture in pictures_stats:
-                        if picture.brightness != 1:
-                            pictures_stats.append(PictureEntry(mirror = True,brightness=picture.brightness,gaus=picture.gaus))
+        save_pictures= []
+        if index.value[0] >= len(picture_conf['mirrored_combination']):
+            return
+
+        save_pictures = [
+            PictureEntry(mirrored=True, brightness=p.brightness, gaus=p.gaus)
+            for p in pictures_stats
+            if p.brightness != 1 and not p.mirrored
+       ]
+
+        pictures_stats.extend(save_pictures)
+        print(pictures_stats)
+        save_augumatiaion_conf()
         refresh_previews()
-          
+
         
     def change_mirror(mirror):
         '''Adds Mirrror images for the pictures'''
@@ -64,13 +71,14 @@ def change_picturs():
                     remove_list.append(picturers)
             for picture in remove_list:
                 pictures_stats.remove(picture)
+        update_combination(ImageEnum.Brightness,True)
         refresh_previews()
         save_augumatiaion_conf(mirror=mirror)
         
 
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
     with ui.dropdown_button('Combine with'):
-        ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e))
+        ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e.value))
 
     def add_brightness():
         '''adds Brigthness for the picuteres with a value '''
@@ -80,7 +88,7 @@ def change_picturs():
         pictures_stats.append(PictureEntry(brightness=val))
         brightness_values = []
         for picture in pictures_stats:
-            if picture.brightness != 1 and picture.brightness not in brightness_values:
+            if picture.brightness != picture.brightness not in brightness_values:
                 brightness_values.append(picture.brightness)
         save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
