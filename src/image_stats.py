@@ -11,3 +11,8 @@ class PictureEntry:
     brightness: float =  1
     mirrored: bool = False
     gaus: float = 0
+
+DEFAULT_VALUES:dict[ImageEnum,float] = {
+     ImageEnum.Brightness: 1.0,
+     ImageEnum.Gaus: 0,
+}

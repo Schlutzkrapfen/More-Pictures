@@ -52,7 +52,3 @@ def dump_yml(data):
     print(yaml_string)
     with open('data.yaml', 'w') as file:
         yaml.dump(data, file, default_flow_style=False, indent=4)
-
-    
-
-    

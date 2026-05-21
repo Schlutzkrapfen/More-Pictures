@@ -4,8 +4,9 @@ from nicegui import ui, run
 import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
-from image_stats import  PictureEntry,ImageEnum
+from image_stats import  PictureEntry,ImageEnum,DEFAULT_VALUES
 from utils import save_augumatiaion_conf
+
 @ui.page('/ImageAgumantation')
 def change_picturs():
     setup_conf = load_setup_conf()
@@ -21,11 +22,11 @@ def change_picturs():
     transformer = ImageTransformer(pictures,json_path,setup_conf['output_dir'])
    
     ui.label("What do you want to change: ")
-
-    pictures_stats = [PictureEntry()]
     
+    pictures_stats = [PictureEntry()]
     image_row = ui.row()
     def refresh_previews():
+        '''displays every image in image_row'''
         image_row.clear()
         with image_row:
             for i,img in enumerate(pictures_stats):
@@ -42,10 +43,18 @@ def change_picturs():
     def update_combination(index:ImageEnum,value:bool):
         '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
         if not value:
-            return
+
+            remove_items = []
+            for i, pic in enumerate(pictures_stats):
+                if pic.mirrored and pic.brightness != DEFAULT_VALUES[index]:
+                    pictures_stats.pop(i)
+                
+            refresh_previews()
+            
+            return 
         save_pictures= []
         if index.value[0] >= len(picture_conf['mirrored_combination']):
-            return
+            return 
 
         brightness_values = []
         for pic in pictures_stats:
@@ -54,13 +63,13 @@ def change_picturs():
         save_pictures = [
             PictureEntry(mirrored=True, brightness=p.brightness, gaus=p.gaus)
             for p in pictures_stats
-            if p.brightness not in brightness_values and p.brightness != 1
+            if p.brightness not in brightness_values and p.brightness != DEFAULT_VALUES[index]
        ]
 
         pictures_stats.extend(save_pictures)
-        print(pictures_stats)
-        save_augumatiaion_conf()
         refresh_previews()
+        return 
+
 
         
     def change_mirror(mirror):
@@ -102,6 +111,7 @@ def change_picturs():
         '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
         change_pictures()
+        refresh_previews()
 
     def remove_picture(index:int):
         '''removes the pictures from the page at a Index'''
@@ -124,4 +134,3 @@ def change_picturs():
     ui.timer(0, startup, once=True)
     ui.button("Use it on all Pictures", on_click=change_pictures)
     pass
-
