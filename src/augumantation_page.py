@@ -44,7 +44,6 @@ def change_picturs():
         '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
 
         if not value:
-
             remove_items = [
             i for i, pic in enumerate(pictures_stats)
             if pic.mirrored and pic.brightness != DEFAULT_VALUES[index]
@@ -75,10 +74,12 @@ def change_picturs():
     def change_mirror(mirror):
         '''Adds Mirrror images for the pictures'''
         if mirror:
+            combine_dropdown.set_visibility(True)
             pictures_stats.append(PictureEntry(mirrored=True))
             update_combination(ImageEnum.Brightness,True)
                     
         else:
+                combine_dropdown.set_visibility(False)
                 remove_items = [
                     i for i, pic in enumerate(pictures_stats)
                     if pic.mirrored]
@@ -91,7 +92,7 @@ def change_picturs():
         refresh_previews()
         
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
-    with ui.dropdown_button('Combine with'):
+    with ui.dropdown_button('Combine with')as combine_dropdown:
         ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e.value))
 
     def add_brightness():
@@ -111,7 +112,7 @@ def change_picturs():
     def startup():
         '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
-        update_combination()
+        update_combination(ImageEnum.Brightness,picture_conf['mirrored_combination'])
         change_pictures()
         refresh_previews()
 

@@ -39,8 +39,8 @@ def download(picure_path,json_path):
         ui.notify(f"Json path is wrong",type="negative")
         return
     save_setup_conf(picture_path=picure_path,json_file=json,dow_output=picure_path)
-
     ui.navigate.to('/ImageAgumantation')
+    
 @ui.page('/')
 def set_up_connection():
     '''Tests if the connection can be set up'''
