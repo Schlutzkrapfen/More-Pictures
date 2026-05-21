@@ -130,8 +130,10 @@ def change_picturs():
                     if img.mirrored:
                         image = transformer.mirror(image)
 
-    brightness_input = ui.number('Brightness value')
-    ui.button('Add', icon='add', on_click=add_brightness)
+    brightness_input = ui.number('Brightness value',step=0.1)
+    ui.button('Add', icon='add', on_click=add_brightness,)
+    gaus_input = ui.number('Blur value (gauss)',step=0.1)
+    ui.button('Add', icon='add')
 
                    
     ui.timer(0, startup, once=True)
