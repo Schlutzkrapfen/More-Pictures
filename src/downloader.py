@@ -200,8 +200,8 @@ def get_local_picutrs(path):
     images_paths= [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]
     if not images_paths:
         print(f"no Imagesfound in folder {path}")
-        sys.exit(0)
-    return images_paths
+        
+    return  images_paths
 
 def get_local_json(path):
     '''gets local json needs exact path'''
@@ -209,5 +209,3 @@ def get_local_json(path):
         return path
     else:
         print(f"not a Valid Path to Json {path}")
-        sys.exit(0)
-        return None

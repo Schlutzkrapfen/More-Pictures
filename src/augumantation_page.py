@@ -42,15 +42,17 @@ def change_picturs():
 
     def update_combination(index:ImageEnum,value:bool):
         '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
+
         if not value:
 
-            remove_items = []
-            for i, pic in enumerate(pictures_stats):
-                if pic.mirrored and pic.brightness != DEFAULT_VALUES[index]:
-                    pictures_stats.pop(i)
-                
+            remove_items = [
+            i for i, pic in enumerate(pictures_stats)
+            if pic.mirrored and pic.brightness != DEFAULT_VALUES[index]
+                ]
+            for i in reversed(remove_items):
+                pictures_stats.pop(i)
             refresh_previews()
-            
+                
             return 
         save_pictures= []
         if index.value[0] >= len(picture_conf['mirrored_combination']):
@@ -70,25 +72,24 @@ def change_picturs():
         refresh_previews()
         return 
 
-
-        
     def change_mirror(mirror):
         '''Adds Mirrror images for the pictures'''
         if mirror:
             pictures_stats.append(PictureEntry(mirrored=True))
+            update_combination(ImageEnum.Brightness,True)
                     
         else:
-            remove_list = []
-            for picturers in  pictures_stats:
-                if picturers.mirrored == True:
-                    remove_list.append(picturers)
-            for picture in remove_list:
-                pictures_stats.remove(picture)
-        update_combination(ImageEnum.Brightness,True)
-        refresh_previews()
+                remove_items = [
+                    i for i, pic in enumerate(pictures_stats)
+                    if pic.mirrored]
+                      
+                for i in reversed(remove_items):
+                    pictures_stats.pop(i)
+            
         save_augumatiaion_conf(mirror=mirror)
         
-
+        refresh_previews()
+        
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
     with ui.dropdown_button('Combine with'):
         ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e.value))
@@ -110,6 +111,7 @@ def change_picturs():
     def startup():
         '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
+        update_combination()
         change_pictures()
         refresh_previews()
 

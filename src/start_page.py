@@ -1,7 +1,7 @@
 
 import yaml
 from nicegui import ui
-from downloader import load_setup_conf, connect_label_studio
+from downloader import load_setup_conf, connect_label_studio,get_local_picutrs,get_local_json
 from utils import save_setup_conf
 
 json_path_glob= ""
@@ -20,6 +20,27 @@ def try_connection(url,api_key,project_id = 1):
         ui.notify(f"Could not connect to Label Studio: {e}", type="negative")
         return False
 
+def download(picure_path,json_path):
+    try:
+        pictuers = get_local_picutrs(picure_path)
+    except:
+        ui.notify(f"Folder Path is wrong",type="negative")
+        return
+    if pictuers == None:
+        ui.notify(f"Folder Path is wrong",type="negative")
+        return
+   
+    try:
+        json = get_local_json(json_path)
+    except:
+        ui.notify(f"Json path is wrong",type="negative")
+        return
+    if json == None:
+        ui.notify(f"Json path is wrong",type="negative")
+        return
+    save_setup_conf(picture_path=picure_path,json_file=json,dow_output=picure_path)
+
+    ui.navigate.to('/ImageAgumantation')
 @ui.page('/')
 def set_up_connection():
     '''Tests if the connection can be set up'''
@@ -41,10 +62,13 @@ def set_up_connection():
                 int(project_id_number.value)
             ))
         with ui.tab_panel(two):
-            ui.label("!!!Local is under construction!!!")
             ui.label("get local Picture Path folder")
-            local_path = ui.input(value=setup_conf['url']).props('clearable')
-            ui.label("") 
+            local_path = ui.input(value=setup_conf['picture_path']).props('clearable')
+            ui.label("Path were Json is stored")
+            json_path = ui.input(value=setup_conf['json_path']).props('clearable')
+
+            ui.button("Start",on_click=lambda: download (local_path.value,json_path.value)
+                      )
 
     
 def dump_yml(data):

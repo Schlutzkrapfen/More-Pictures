@@ -1,5 +1,5 @@
 import yaml
-def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =None , conf: dict =None,  path: str = "config.yml"):
+def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =None , conf: dict =None,picture_path = None, json_file = None, path: str = "config.yml"):
     '''saves everything to a yml if let empty the part of the yml will not be changed'''
     try:
         if conf != None:
@@ -17,6 +17,10 @@ def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =N
             config['label_studio']['project_id'] = project_id
         if dow_output != None:
             config['donwload']['output_dir'] = dow_output
+        if json_file != None:
+            config['local']['json_path'] = json_file
+        if picture_path != None:
+            config['local']['picture_path'] = picture_path
 
         with open(path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
