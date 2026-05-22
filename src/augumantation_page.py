@@ -100,28 +100,31 @@ def change_picturs():
     with ui.dropdown_button('Combine with')as combine_dropdown:
         ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e.value))
 
-    def add_brightness():
+    def add_brightness(val = None):
         '''adds Brigthness for the picuteres with a value '''
-        val = brightness_input.value
+        if val == None:
+            val = brightness_input.value
         if val is None:
             return
         pictures_stats.append(PictureEntry(brightness=val))
         brightness_values = []
         for picture in pictures_stats:
-            if picture.brightness != picture.brightness not in brightness_values:
+            if  picture.brightness not in brightness_values:
                 brightness_values.append(picture.brightness)
+        print(brightness_values)
         save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
     
-    def add_gaus(): 
+    def add_gaus(val = None): 
         '''adds a gaus filter to a picture'''
-        val = gaus_input.value
+        if val is None:
+            val = gaus_input.value
         if val is None:
             return
         pictures_stats.append(PictureEntry(gaus=val))
         gaus_values = []
         for picture in pictures_stats:
-            if picture.brightness != picture.brightness not in gaus_values:
+            if picture.gaus not in gaus_values:
                 gaus_values.append(val)
         save_augumatiaion_conf(guas=gaus_values)
         refresh_previews()
@@ -134,7 +137,6 @@ def change_picturs():
             add_brightness(val)
         for val in picture_conf['gauss_strength']:
             add_gaus(val)
-        update_combination(ImageEnum.Brightness,picture_conf['mirrored_combination'])
         refresh_previews()
 
     def remove_picture(index:int):
