@@ -24,20 +24,25 @@ def change_picturs():
     ui.label("What do you want to change: ")
     
     pictures_stats = [PictureEntry()]
-    image_row = ui.row()
+    image_row = ui.grid(columns=2)
     def refresh_previews():
         '''displays every image in image_row'''
         image_row.clear()
         with image_row:
             for i,img in enumerate(pictures_stats):
 
-                val = img.brightness
-                with ui.grid(columns=5):
-                    image =  transformer.adjust_brightness(pictures[0], val)
+                brit_val = img.brightness
+                gaus_val = img.gaus
+                with ui.grid(columns=3):
+                    image =  transformer.adjust_brightness_to_single(pictures[0], brit_val)
+                    image = transformer.add_gaussian_filter_to_single(pictures[0],gaus_val)
                     if img.mirrored:
                         image = transformer.mirror(image)
-                    ui.image(image)
-                    ui.label(f"Brightness: {val}")
+                    ui.image(image).style('min-width: 300px; height: auto;')
+                    with ui.dropdown_button( auto_close=True).style('height: 50%,max-width:50px'):
+                      ui.label(f"Brightness: {brit_val}")
+                      ui.label(f"Blur Effekt: {gaus_val}")
+                      ui.label(f"mirrored:{img.mirrored}" )
                     ui.button(icon='delete', on_click=lambda v=i: remove_picture(v)).props('flat round dense')
 
     def update_combination(index:ImageEnum,value:bool):
@@ -107,6 +112,7 @@ def change_picturs():
                 brightness_values.append(picture.brightness)
         save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
+    
     def add_gaus(): 
         '''adds a gaus filter to a picture'''
         val = gaus_input.value
@@ -116,23 +122,29 @@ def change_picturs():
         gaus_values = []
         for picture in pictures_stats:
             if picture.brightness != picture.brightness not in gaus_values:
-                gaus_values.append(picture.brightness)
-        save_augumatiaion_conf(gaus_values=gaus_values)
+                gaus_values.append(val)
+        save_augumatiaion_conf(guas=gaus_values)
         refresh_previews()
 
    
     def startup():
         '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
+        for val in picture_conf['picture_brightness']:
+            add_brightness(val)
+        for val in picture_conf['gauss_strength']:
+            add_gaus(val)
         update_combination(ImageEnum.Brightness,picture_conf['mirrored_combination'])
-        change_pictures()
         refresh_previews()
 
     def remove_picture(index:int):
         '''removes the pictures from the page at a Index'''
         pictures_stats.pop(index)
         refresh_previews()
+    
     async def change_pictures(): 
+        '''!!!NOT WORKING AT THE MOMENT!!!!\n
+        Saves the Pictures when after you press the finisch the work'''
         image_row.clear()
         with image_row:
             for img in pictures_stats:
@@ -142,9 +154,9 @@ def change_picturs():
                     if img.mirrored:
                         image = transformer.mirror(image)
 
-    brightness_input = ui.number('Brightness value',step=0.1)
+    brightness_input = ui.number('Brightness value',step=0.1,value=DEFAULT_VALUES[ImageEnum.Brightness])
     ui.button('Add', icon='add', on_click=add_brightness,)
-    gaus_input = ui.number('Blur value (gauss)',step=0.1)
+    gaus_input = ui.number('Blur value (gauss)',step=0.1, value=DEFAULT_VALUES[ImageEnum.Gaus])
     ui.button('Add', icon='add', on_click=add_gaus,)
     
 

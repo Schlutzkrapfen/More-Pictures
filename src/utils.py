@@ -28,25 +28,28 @@ def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =N
     except Exception as e:
         print(f"Save failed: {e}")
 
-def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,mirror_combination = None,brightness = None,  path: str = "config.yml"):
+def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,mirror_combination = None,brightness = None,guas = None,  path: str = "config.yml"):
     '''saves everything for the picuter fiels to a yml if let empty the part of the yml will not be changed'''
     try:
         if conf != None:
             with open(path, 'w') as f:
                 yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
-        
+                
 
         with open(path, "r") as f:
             config = yaml.safe_load(f)
         if mirror != None:
             config['mirrored']['mirrored'] = mirror
-        if brightness != None:
-            config['brigtness']['brigtness_list'] = brightness
         if mirror_combination != None:
             config['mirrored']['mirrored_combination'] = mirror_combination
-        
+        if brightness != None:
+            config['brightness']['brigtness_list'] = brightness
+            print(brightness)
+        if guas != None:
+            config['gauss']['gauss_list'] = guas
+                
         with open(path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
         print("Save worked")
     except Exception as e:
-        print(f"Save failed: {e}")
+        print(f"Save failed because of {e}")
