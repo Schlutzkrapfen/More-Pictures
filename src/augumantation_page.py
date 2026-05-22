@@ -107,6 +107,18 @@ def change_picturs():
                 brightness_values.append(picture.brightness)
         save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
+    def add_gaus(): 
+        '''adds a gaus filter to a picture'''
+        val = gaus_input.value
+        if val is None:
+            return
+        pictures_stats.append(PictureEntry(gaus=val))
+        gaus_values = []
+        for picture in pictures_stats:
+            if picture.brightness != picture.brightness not in gaus_values:
+                gaus_values.append(picture.brightness)
+        save_augumatiaion_conf(gaus_values=gaus_values)
+        refresh_previews()
 
    
     def startup():
@@ -133,7 +145,8 @@ def change_picturs():
     brightness_input = ui.number('Brightness value',step=0.1)
     ui.button('Add', icon='add', on_click=add_brightness,)
     gaus_input = ui.number('Blur value (gauss)',step=0.1)
-    ui.button('Add', icon='add')
+    ui.button('Add', icon='add', on_click=add_gaus,)
+    
 
                    
     ui.timer(0, startup, once=True)
