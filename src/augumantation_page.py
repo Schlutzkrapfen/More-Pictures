@@ -1,7 +1,6 @@
 
 
 from nicegui import ui, run
-import asyncio
 from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_tasks, get_local_picutrs, load_picture_conf
 from ImageTransformer import ImageTransformer
 from image_stats import  PictureEntry,ImageEnum,DEFAULT_VALUES
@@ -51,36 +50,42 @@ def change_picturs():
         pictures_stats.clear()
         pictures_stats.append(PictureEntry)
         refresh_previews()
+    def get_attr(pic,index) -> any:
+        """Helper to get the relevant attribute based on index."""
+        match index:
+            case ImageEnum.Brightness:
+                return pic.brightness
+            case ImageEnum.Gaus:
+                return pic.gaus
     def update_combination(index:ImageEnum,value:bool):
-        '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
-
+        '''updtaes the combination of the pictures (works just with mirror at the moment) '''
         if not value:
             remove_items = [
-            i for i, pic in enumerate(pictures_stats)
-            if pic.mirrored and pic.brightness != DEFAULT_VALUES[index]
+                i for i, pic in enumerate(pictures_stats)
+                if pic.mirrored and get_attr(pic,index) != DEFAULT_VALUES[index]
                 ]
+               
             for i in reversed(remove_items):
                 pictures_stats.pop(i)
             refresh_previews()
-                
             return 
         save_pictures= []
         if index.value[0] >= len(picture_conf['mirrored_combination']):
             return 
 
-        brightness_values = []
+        values = []
         for pic in pictures_stats:
             if pic.mirrored:
-                brightness_values.append(pic.brightness)
-        save_pictures = [
-            PictureEntry(mirrored=True, brightness=p.brightness, gaus=p.gaus)
-            for p in pictures_stats
-            if p.brightness not in brightness_values and p.brightness != DEFAULT_VALUES[index]
-       ]
+                values.append(get_attr(pic,index))
+                save_pictures = [
+                            PictureEntry(mirrored=True, brightness=p.brightness, gaus=p.gaus)
+                            for p in pictures_stats
+                            if get_attr(p,index) not in values and get_attr(p,index) != DEFAULT_VALUES[index]
+                    ]
 
+        
         pictures_stats.extend(save_pictures)
         refresh_previews()
-        return 
 
     def change_mirror(mirror):
         '''Adds Mirrror images for the pictures'''
@@ -103,6 +108,7 @@ def change_picturs():
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
     with ui.dropdown_button('Combine with')as combine_dropdown:
         ui.checkbox(text="Brightness",value=picture_conf['mirrored_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Brightness,e.value))
+        ui.checkbox(text="Gaus",value=picture_conf['gauss_combination'][ImageEnum.Brightness.value[0]],on_change=lambda e :update_combination(ImageEnum.Gaus,e.value))
 
     def add_brightness(val = None):
         '''adds Brigthness for the picuteres with a value '''
