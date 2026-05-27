@@ -124,7 +124,6 @@ class ImageTransformer:
             suffix=f"gaus-{strength}",
             transform_fn=lambda img: img.filter(ImageFilter.GaussianBlur(radius=strength)),
             path= path
-            
         )
 
     def mirror(self):

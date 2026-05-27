@@ -51,10 +51,11 @@ def run_without_gui():
 def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', 0))
-        return s.getsockname()[1]    
+        return s.getsockname()[1] 
 
 def main():  
-   ui.run(port=find_free_port())
+   ui.add_css('body { background: #B1D3EF; }.q-card { border-radius: 16px; padding: 2rem; max-width: 560px; width: 100%; }', shared=True)
+   ui.run(port=find_free_port()) 
 if __name__ in {"__main__", "__mp_main__"}:
     #run_without_gui()
     main()

@@ -1,4 +1,5 @@
 import yaml
+from yml_creator import generate_default_config
 def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =None , conf: dict =None,picture_path = None, json_file = None, path: str = "config.yml"):
     '''saves everything to a yml if let empty the part of the yml will not be changed'''
     try:
@@ -6,6 +7,7 @@ def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =N
             with open(path, 'w') as f:
                 yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
         
+
 
         with open(path, "r") as f:
             config = yaml.safe_load(f)
@@ -28,7 +30,7 @@ def save_setup_conf(url = None,api_key= None,project_id:int = None,dow_output =N
     except Exception as e:
         print(f"Save failed: {e}")
 
-def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,mirror_combination = None,brightness = None,guas = None,  path: str = "config.yml"):
+def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,mirror_combination = None,brightness = None,guas = None,  path: str = "config.yml",reset:bool= False):
     '''saves everything for the picuter fiels to a yml if let empty the part of the yml will not be changed'''
     try:
         if conf != None:
@@ -36,6 +38,11 @@ def save_augumatiaion_conf(conf: dict =None,mirror:bool = None,mirror_combinatio
                 yaml.dump(conf, f, default_flow_style=False, sort_keys=False, default_style=None)
                 
 
+        if reset:
+            config['mirrored']['mirrored'] = False
+            config['mirrored']['mirrored_combination'] = []
+            config['brightness']['brigtness_list'] = []
+            config['gauss']['gauss_list'] = []
         with open(path, "r") as f:
             config = yaml.safe_load(f)
         if mirror != None:

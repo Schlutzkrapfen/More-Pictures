@@ -49,26 +49,28 @@ def set_up_connection():
         one = ui.tab('Label Studio')
         two = ui.tab('Locally')
     with ui.tab_panels(tabs, value=one).classes('w-full'):
-        with ui.tab_panel(one):
-            ui.label("The base URL where your Label Studio instance is running")
-            i = ui.input(value=setup_conf['url']).props('clearable')
-            ui.label("Your API key — either a Personal Access Token (PAT) or legacy access token")
-            d = ui.input(value=setup_conf['api_key'],password=True).props('clearable')
-            ui.label("The numeric ID of the project you want to download images from")
-            project_id_number =ui.number(value=setup_conf['project_id'])
-            ui.button("Start", on_click=lambda: try_connection(
-                i.value,
-                d.value,
-                int(project_id_number.value)
-            ))
-        with ui.tab_panel(two):
-            ui.label("get local Picture Path folder")
-            local_path = ui.input(value=setup_conf['picture_path']).props('clearable')
-            ui.label("Path were Json is stored")
-            json_path = ui.input(value=setup_conf['json_path']).props('clearable')
-
-            ui.button("Start",on_click=lambda: download (local_path.value,json_path.value)
-                      )
+        with ui.tab_panel(one).style('background: #B1D3EF;'):
+            with ui.card().classes(' mx-auto mt-20').style('width:75%'):
+                ui.label("The base URL where your Label Studio instance is running")
+                i = ui.input(value=setup_conf['url']).props('clearable').classes(' w-full').props('outlined')
+                ui.label("Your API key — either a Personal Access Token (PAT) or legacy access token")
+                d = ui.input(value=setup_conf['api_key'],password=True).props('clearable').classes('w-full').props('outlined')
+                ui.label("The numeric ID of the project you want to download images from")
+                project_id_number =ui.number(value=setup_conf['project_id']).classes('w-full').props('outlined')
+                ui.button("Start", on_click=lambda: try_connection(
+                    i.value,
+                    d.value,
+                    int(project_id_number.value)
+                ))
+        with ui.tab_panel(two).style('background: #B1D3EF;'):
+            with ui.card().classes(' mx-auto mt-20').style('width:75%'):
+                ui.label("get local Picture Path folder")
+                local_path = ui.input(value=setup_conf['picture_path']).props('clearable').classes(' w-full').props('outlined')
+                ui.label("Path were Json is stored")
+                json_path = ui.input(value=setup_conf['json_path']).props('clearable').classes(' w-full').props('outlined')
+                ui.space()
+                ui.button("Start",on_click=lambda: download (local_path.value,json_path.value)
+                          )
 
     
 def dump_yml(data):

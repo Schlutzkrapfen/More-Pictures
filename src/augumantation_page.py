@@ -25,6 +25,7 @@ def change_picturs():
     
     pictures_stats = [PictureEntry()]
     image_row = ui.grid(columns=2)
+   
     def refresh_previews():
         '''displays every image in image_row'''
         image_row.clear()
@@ -34,8 +35,8 @@ def change_picturs():
                 brit_val = img.brightness
                 gaus_val = img.gaus
                 with ui.grid(columns=3):
-                    image =  transformer.adjust_brightness_to_single(pictures[0], brit_val)
-                    image = transformer.add_gaussian_filter_to_single(pictures[0],gaus_val)
+                    image = transformer.adjust_brightness_to_single(pictures[0], brit_val)
+                    image = transformer.add_gaussian_filter_to_single(image,gaus_val)
                     if img.mirrored:
                         image = transformer.mirror(image)
                     ui.image(image).style('min-width: 300px; height: auto;')
@@ -44,7 +45,12 @@ def change_picturs():
                       ui.label(f"Blur Effekt: {gaus_val}")
                       ui.label(f"mirrored:{img.mirrored}" )
                     ui.button(icon='delete', on_click=lambda v=i: remove_picture(v)).props('flat round dense')
-
+    def reset ():
+        '''Reset all the values in the pictures config'''
+        save_augumatiaion_conf(reset=True)
+        pictures_stats.clear()
+        pictures_stats.append(PictureEntry)
+        refresh_previews()
     def update_combination(index:ImageEnum,value:bool):
         '''updtaes the combination of the pictures (works just on mirror and brightness at the moment)'''
 
@@ -91,9 +97,7 @@ def change_picturs():
                       
                 for i in reversed(remove_items):
                     pictures_stats.pop(i)
-            
         save_augumatiaion_conf(mirror=mirror)
-        
         refresh_previews()
         
     ui.checkbox(text="Mirrored",value=picture_conf['mirrored'],on_change=lambda e :change_mirror(e.value)) 
@@ -104,7 +108,8 @@ def change_picturs():
         '''adds Brigthness for the picuteres with a value '''
         if val == None:
             val = brightness_input.value
-        if val is None:
+        if val is None or val == DEFAULT_VALUES[ImageEnum.Brightness]:
+            ui.notify("The Value is Nothing or default value ",type="negativ")
             return
         pictures_stats.append(PictureEntry(brightness=val))
         brightness_values = []
@@ -119,7 +124,8 @@ def change_picturs():
         '''adds a gaus filter to a picture'''
         if val is None:
             val = gaus_input.value
-        if val is None:
+        if val is None or val == DEFAULT_VALUES[ImageEnum.Gaus]:
+            ui.notify("The Value is Nothing or default value ",type="negativ")
             return
         pictures_stats.append(PictureEntry(gaus=val))
         gaus_values = []
@@ -152,17 +158,17 @@ def change_picturs():
             for img in pictures_stats:
                 for pic in pictures:
                     val = img.brightness
-                    image =  transformer.adjust_brightness(pic, val)
+                    image = await run.io_bound(transformer.adjust_brightness_to_single, pic, val)
                     if img.mirrored:
-                        image = transformer.mirror(image)
+                        image = await run.io_bound(transformer.mirror, image)
+                ui.notify(f"Changed everything image with stats {img}", type="positive")
+        ui.notify(f"This doesen't work at moment",type='negative')
 
     brightness_input = ui.number('Brightness value',step=0.1,value=DEFAULT_VALUES[ImageEnum.Brightness])
     ui.button('Add', icon='add', on_click=add_brightness,)
     gaus_input = ui.number('Blur value (gauss)',step=0.1, value=DEFAULT_VALUES[ImageEnum.Gaus])
     ui.button('Add', icon='add', on_click=add_gaus,)
-    
-
-                   
     ui.timer(0, startup, once=True)
     ui.button("Use it on all Pictures", on_click=change_pictures)
+    ui.button("reset",on_click=reset )
     pass
