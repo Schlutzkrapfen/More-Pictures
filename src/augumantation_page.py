@@ -114,7 +114,7 @@ def change_picturs():
         pictures_stats.append(PictureEntry(brightness=val))
         brightness_values = []
         for picture in pictures_stats:
-            if  picture.brightness not in brightness_values:
+            if  picture.brightness not in brightness_values and picture.brightness != DEFAULT_VALUES[ImageEnum.Brightness]:
                 brightness_values.append(picture.brightness)
         print(brightness_values)
         save_augumatiaion_conf(brightness=brightness_values)
@@ -130,8 +130,8 @@ def change_picturs():
         pictures_stats.append(PictureEntry(gaus=val))
         gaus_values = []
         for picture in pictures_stats:
-            if picture.gaus not in gaus_values:
-                gaus_values.append(val)
+            if picture.gaus not in gaus_values and picture.gaus != DEFAULT_VALUES[ImageEnum.Gaus]:
+                gaus_values.append(picture.gaus)
         save_augumatiaion_conf(guas=gaus_values)
         refresh_previews()
 
