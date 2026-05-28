@@ -11,6 +11,8 @@ class ImageTransformer:
         self.image_paths = image_paths
         self.path_to_label = path_to_label
         self.output_path = output_path
+        self.tmp_dir = os.path.join(output_path, "tmp")
+        os.makedirs(self.tmp_dir, exist_ok=True)
 
     # --- Label helpers ---
 
@@ -64,19 +66,18 @@ class ImageTransformer:
 
     # --- Core transform engine ---
     def _apply_transform_to_single(self,suffix,transform_fn,path,label_fn=None):
-        """Base helper: open one image, apply transform_fn,!label doesen't get saved."""
+        """Base helper: open one image, apply transform_fn,!label doesen't get saved. pictures get saved in tmp folder"""
         if label_fn is None:
             label_fn = self.add_labels 
-
-        saved_paths = []
+        
         name, ext = os.path.splitext(path)
-        new_filepath = f"{name}-{suffix}{ext}"
+        name =f"tmp-{suffix}{ext}"
+        new_filepath = os.path.join(self.tmp_dir, name)
         with Image.open(path) as img:
-            result = transform_fn(img)
+            result = transform_fn(img) 
             result.save(new_filepath)
-        saved_paths =new_filepath 
-        print(f"  Saved: {os.path.basename(new_filepath)}")
-        return saved_paths
+        #print(f"  Saved: {os.path.basename(new_filepath)}")
+        return new_filepath
 
     def _apply_transform(self, suffix, transform_fn, label_fn=None):
         """Base helper: open each image, apply transform_fn, save, and label."""

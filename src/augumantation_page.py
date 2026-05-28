@@ -5,6 +5,9 @@ from downloader import load_setup_conf,fetch_tasks, connect_label_studio,save_ta
 from ImageTransformer import ImageTransformer
 from image_stats import  PictureEntry,ImageEnum,DEFAULT_VALUES
 from utils import save_augumatiaion_conf
+import base64
+from io import BytesIO
+from PIL import Image
 
 @ui.page('/ImageAgumantation')
 def change_picturs():
@@ -24,7 +27,17 @@ def change_picturs():
     
     pictures_stats = [PictureEntry()]
     image_row = ui.grid(columns=2)
-   
+
+    def pil_to_base64(img):
+        if isinstance(img, str):
+            img = Image.open(img)
+    
+        buffer = BytesIO()
+        img.save(buffer, format='JPEG')
+        buffer.seek(0)
+        b64 = base64.b64encode(buffer.read()).decode('utf-8')
+        return f'data:image/jpeg;base64,{b64}'
+    
     def refresh_previews():
         '''displays every image in image_row'''
         image_row.clear()
@@ -38,7 +51,9 @@ def change_picturs():
                     image = transformer.add_gaussian_filter_to_single(image,gaus_val)
                     if img.mirrored:
                         image = transformer.mirror(image)
-                    ui.image(image).style('min-width: 300px; height: auto;')
+                    image_src = pil_to_base64(image)
+                
+                    ui.image(image_src).style('min-width: 300px; height: auto;')
                     with ui.dropdown_button( auto_close=True).style('height: 50%,max-width:50px'):
                       ui.label(f"Brightness: {brit_val}")
                       ui.label(f"Blur Effekt: {gaus_val}")
@@ -145,9 +160,9 @@ def change_picturs():
     def startup():
         '''is called when the Page is loaded an ist used to display all the pictures that are used at the moment'''
         change_mirror(picture_conf['mirrored'])
-        for val in picture_conf['picture_brightness']:
+        for val in picture_conf['picture_brightness'] or []:
             add_brightness(val)
-        for val in picture_conf['gauss_strength']:
+        for val in picture_conf['gauss_strength'] or []:
             add_gaus(val)
         refresh_previews()
 
