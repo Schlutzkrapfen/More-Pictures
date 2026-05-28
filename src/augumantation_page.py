@@ -47,10 +47,10 @@ def change_picturs():
                 brit_val = img.brightness
                 gaus_val = img.gaus
                 with ui.grid(columns=3):
-                    image = transformer.adjust_brightness_to_single(pictures[0], brit_val)
-                    image = transformer.add_gaussian_filter_to_single(image,gaus_val)
+                    image = transformer.adjust_brightness_to_single(pictures[0], brit_val,tmp_folder=True)
+                    image = transformer.add_gaussian_filter_to_single(image,gaus_val,tmp_folder=True)
                     if img.mirrored:
-                        image = transformer.mirror(image)
+                        image = transformer.mirror(image,tmp_folder=True)
                     image_src = pil_to_base64(image)
                 
                     ui.image(image_src).style('min-width: 300px; height: auto;')
@@ -172,7 +172,6 @@ def change_picturs():
         refresh_previews()
     
     async def change_pictures(): 
-        '''!!!NOT WORKING AT THE MOMENT!!!!\n
         Saves the Pictures when after you press the finisch the work'''
         image_row.clear()
         with image_row:

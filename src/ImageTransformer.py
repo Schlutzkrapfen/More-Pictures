@@ -65,14 +65,17 @@ class ImageTransformer:
         print("   added the task to the json")
 
     # --- Core transform engine ---
-    def _apply_transform_to_single(self,suffix,transform_fn,path,label_fn=None):
+    def _apply_transform_to_single(self,suffix,transform_fn,path,label_fn=None,tmp_folder=False):
         """Base helper: open one image, apply transform_fn,!label doesen't get saved. pictures get saved in tmp folder"""
         if label_fn is None:
             label_fn = self.add_labels 
         
         name, ext = os.path.splitext(path)
-        name =f"tmp-{suffix}{ext}"
-        new_filepath = os.path.join(self.tmp_dir, name)
+        if tmp_folder:
+            name =f"tmp-{suffix}{ext}"
+            new_filepath = os.path.join(self.tmp_dir, name)
+        else:
+            new_filepath =f"{name}-{suffix}{ext}"
         with Image.open(path) as img:
             result = transform_fn(img) 
             result.save(new_filepath)
@@ -104,12 +107,13 @@ class ImageTransformer:
             suffix=f"brit-{factor}",
             transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor)
         )
-    def adjust_brightness_to_single(self,path, factor=1.5):
+    def adjust_brightness_to_single(self,path, factor=1.5,tmp_folder=False):
         """Adjust the brightness of the image."""
         return self._apply_transform_to_single(
             suffix=f"brit-{factor}",
             transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor),
-            path=path
+            path=path,
+            tmp_folder=tmp_folder
 
         )
     def add_gaussian_filter(self, strength=1):
@@ -119,12 +123,13 @@ class ImageTransformer:
             transform_fn=lambda img: img.filter(ImageFilter.GaussianBlur(radius=strength))
             
         )
-    def add_gaussian_filter_to_single(self,path, strength=1):
+    def add_gaussian_filter_to_single(self,path, strength=1,tmp_folder= False):
         """Adds a Gaussian filter to the image."""
         return self._apply_transform_to_single(
             suffix=f"gaus-{strength}",
             transform_fn=lambda img: img.filter(ImageFilter.GaussianBlur(radius=strength)),
-            path= path
+            path= path,
+            tmp_folder=tmp_folder
         )
 
     def mirror(self):
@@ -134,11 +139,12 @@ class ImageTransformer:
             transform_fn=ImageOps.mirror,
             label_fn=self.change_mirror_labels
         )
-    def mirror(self,path):
+    def mirror(self,path,tmp_folder= False):
         '''Mirror a single image with a path'''
         return self._apply_transform_to_single( 
             suffix="mirrored",
             transform_fn=ImageOps.mirror,
             path = path,
-            label_fn=self.change_mirror_labels
+            label_fn=self.change_mirror_labels,
+            tmp_folder=tmp_folder
         )
