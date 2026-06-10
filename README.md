@@ -48,3 +48,4 @@ Once the setup is complete, start the script:
 ```bash
 python main.py
 ```
+Than follow the instructions on screen
