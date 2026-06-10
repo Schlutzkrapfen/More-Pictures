@@ -32,7 +32,8 @@ def download(picure_path, json_path, output_path):
     except Exception as e:
         ui.notify(f"Folder Path is wrong. Exact Error:{e}", type="negative")
         return
-    if pictuers is not None or len(pictuers) == 0:
+    print(len(pictuers))
+    if pictuers is None or len(pictuers) == 0:
         ui.notify("Picture Folder Path is wrong", type="negative")
         return
     try:
@@ -40,7 +41,7 @@ def download(picure_path, json_path, output_path):
     except Exception as e:
         ui.notify(f"Json path is wrong Error {e}", type="negative")
         return
-    if json is not None:
+    if json is None:
         ui.notify("Json path is wrong", type="negative")
         return
 
