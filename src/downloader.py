@@ -1,13 +1,17 @@
-import yaml
-import sys
 import json
-import requests
+import sys
 from pathlib import Path
+
+import requests
+import yaml
 from label_studio_sdk import LabelStudio
 from label_studio_sdk.core import ApiError
+from typing_extensions import Any
+
 from yml_creator import generate_default_config
 
-def load_config(file_path="config.yml"):
+
+def load_config(file_path="config.yml") -> None | Any:
     """Loads and returns the full config dict."""
     try:
         with open(file_path, "r") as f:
@@ -24,34 +28,34 @@ def load_config(file_path="config.yml"):
         print(f"Error: The file '{file_path}' was not found.")
     except yaml.YAMLError as e:
         print(f"Error: Failed to parse YAML file: {e}")
-    
+
 
 def load_picture_conf(file_path="config.yml"):
     """Loads picture settings with brightness and gauss."""
     config = load_config(file_path)
-    brightness = config.get('brightness', {})
-    mirror = config.get('mirrored',{})
-    gauss = config.get('gauss', {})  
-    output = config.get('output')
+    brightness = config.get("brightness", {})
+    mirror = config.get("mirrored", {})
+    gauss = config.get("gauss", {})
+    output = config.get("output")
 
-    result=  {
-        "json_output_path":       output.get('json_output_path'),
-        "picture_brightness":     brightness.get('brigtness_list'),
-        "brightness_combination": brightness.get('brightness_combination'),
-        "gauss_strength":         gauss.get('gauss_list'),
-        "gauss_combination":      gauss.get('gauss_combination'),
-        "mirrored":               mirror.get('mirrored'),
-        "mirrored_combination":   mirror.get('mirrored_combination')
-
+    result = {
+        "json_output_path": output.get("json_output_path"),
+        "picture_brightness": brightness.get("brigtness_list"),
+        "brightness_combination": brightness.get("brightness_combination"),
+        "gauss_strength": gauss.get("gauss_list"),
+        "gauss_combination": gauss.get("gauss_combination"),
+        "mirrored": mirror.get("mirrored"),
+        "mirrored_combination": mirror.get("mirrored_combination"),
     }
     missing = [k for k, v in result.items() if v is None]
     if missing:
         print(f"Warning: missing config keys: {missing}")
     return result
 
+
 def is_valid_json(path):
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             json.load(f)
         return True
     except (json.JSONDecodeError, FileNotFoundError):
@@ -59,34 +63,33 @@ def is_valid_json(path):
 
 
 def load_setup_conf(file_path="config.yml"):
-    '''loads config with url,api key,project id, output dir, only completed'''
-   
+    """loads config with url,api key,project id, output dir, only completed"""
+
     config = load_config(file_path)
-    lo_section = config.get('local',{})
-    ls_section = config.get('label_studio', {})
-    dl_section = config.get('download', {})
+    lo_section = config.get("local", {})
+    ls_section = config.get("label_studio", {})
+    dl_section = config.get("download", {})
 
     return {
-        "local": lo_section.get('local',False),
-        "json_path": lo_section.get('json_path'),
-        "picture_path": lo_section.get('picture_path'),
-
-        "url": ls_section.get('url'),
-        "api_key": ls_section.get('api_key'),
-        "project_id": ls_section.get('project_id'),
-        "output_dir": dl_section.get('output_dir', 'downloads'),
-        "only_completed": dl_section.get('only_completed', True)
+        "local": lo_section.get("local", False),
+        "json_path": lo_section.get("json_path"),
+        "picture_path": lo_section.get("picture_path"),
+        "url": ls_section.get("url"),
+        "api_key": ls_section.get("api_key"),
+        "project_id": ls_section.get("project_id"),
+        "output_dir": dl_section.get("output_dir", "downloads"),
+        "only_completed": dl_section.get("only_completed", True),
     }
 
+
 def connect_label_studio(base_url, api_key, project_id):
-    '''Checks if it can connect to label studio'''
+    """Checks if it can connect to label studio"""
     if not base_url or not api_key or api_key == "YOUR_API_KEY":
-         
         print(" Error: URL or API Key is missing in the config file.")
         return None
     try:
         client = LabelStudio(base_url=base_url, api_key=api_key)
-        
+
         project = client.projects.get(id=project_id)
         print(f" Success! Connected to project: '{project.title}' (ID: {project_id})")
         return client
@@ -95,8 +98,9 @@ def connect_label_studio(base_url, api_key, project_id):
         print(f" Label Studio API Error (Status {e.status_code}) ")
     except Exception as e:
         print(f" Unexpected Connection Error: {e}")
-    
+
     return None
+
 
 def fetch_tasks(client, project_id, only_completed=True):
     """Fetch all tasks from the project, optionally filtering for completed ones only."""
@@ -116,6 +120,7 @@ def fetch_tasks(client, project_id, only_completed=True):
     except Exception as e:
         print(f"  Unexpected error while fetching tasks: {e}")
         return []
+
 
 def save_tasks(tasks, output_dir, project_id):
     """Save fetched tasks to a JSON file inside output_dir. reuterns path"""
@@ -140,8 +145,9 @@ def save_tasks(tasks, output_dir, project_id):
     print(f"  Saved {len(serializable)} task(s) to '{output_file}'")
     return output_file
 
-def donwload_image(task,api_key,url,output_dir):
-    '''downloads a single Image and returns path'''
+
+def donwload_image(task, api_key, url, output_dir):
+    """downloads a single Image and returns path"""
     image_path = task.data.get("image")
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -149,8 +155,7 @@ def donwload_image(task,api_key,url,output_dir):
         raise ValueError("Task has no image field")
     filename = image_path.split("/")[-1].split("?d=")[-1].split("/")[-1]
     response = requests.get(
-        f"{url}{image_path}",
-        headers={"Authorization": f"Token {api_key}"}
+        f"{url}{image_path}", headers={"Authorization": f"Token {api_key}"}
     )
     if response.status_code == 200:
         save_path = out_path / filename
@@ -159,52 +164,56 @@ def donwload_image(task,api_key,url,output_dir):
         print(f"Saved: {save_path}")
         return save_path
     else:
-        print(f"Error when Saving")
-        raise ConnectionError(f"Failed to download image: {response.status_code} {response.text}")
+        print("Error when Saving")
+        raise ConnectionError(
+            f"Failed to download image: {response.status_code} {response.text}"
+        )
 
-def download_images(tasks,api_key,url,output_dir)-> str:
-    '''Downloads all the Images and returns their path in a Array'''
-    
+
+def download_images(tasks, api_key, url, output_dir) -> str:
+    """Downloads all the Images and returns their path in a Array"""
+
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
-    download,skipped = 0,0
+    download, skipped = 0, 0
     images_paths = []
-    
+
     for task in tasks:
         image_path = task.data.get("image")
         if not image_path:
             continue
-        
+
         filename = image_path.split("/")[-1].split("?d=")[-1].split("/")[-1]
-        
+
         response = requests.get(
-            f"{url}{image_path}",
-            headers={"Authorization": f"Token {api_key}"}
+            f"{url}{image_path}", headers={"Authorization": f"Token {api_key}"}
         )
         if response.status_code == 200:
             save_path = out_path / filename
             with open(save_path, "wb") as f:
                 f.write(response.content)
             print(f"Saved: {save_path}")
-            download +=1
+            download += 1
             images_paths.append(save_path)
         else:
             print(f"Error when Saving")
-            skipped +=1
+            skipped += 1
     print(f"downloaded: {download}, skipped: {skipped}")
     return images_paths
 
+
 def get_local_picutrs(path):
-    '''Gets the all the pictures that are stored in the folder that you give'''
-    extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
-    images_paths= [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]
+    """Gets the all the pictures that are stored in the folder that you give"""
+    extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
+    images_paths = [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]
     if not images_paths:
         print(f"no Imagesfound in folder {path}")
-        
-    return  images_paths
+
+    return images_paths
+
 
 def get_local_json(path):
-    '''gets local json needs exact path'''
+    """gets local json needs exact path"""
     if is_valid_json(path):
         return path
     else:

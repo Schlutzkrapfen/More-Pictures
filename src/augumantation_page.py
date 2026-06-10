@@ -63,10 +63,10 @@ def change_picturs():
                         pictures[0], brit_val, tmp_folder=True
                     )
                     image = transformer.add_gaussian_filter_to_single(
-                        image, gaus_val, tmp_folder=True
+                        image, int(gaus_val), tmp_folder=True
                     )
                     if img.mirrored:
-                        image = transformer.mirror(image, tmp_folder=True)
+                        image = transformer.mirror_single(image, tmp_folder=True)
                     image_src = pil_to_base64(image)
 
                     ui.image(image_src).style("min-width: 300px; height: auto;")
@@ -87,7 +87,7 @@ def change_picturs():
         pictures_stats.append(PictureEntry)
         refresh_previews()
 
-    def get_attr(pic, index) -> any:
+    def get_attr(pic, index) -> Any:
         """Helper to get the relevant attribute based on index."""
         match index:
             case ImageEnum.Brightness:
@@ -161,10 +161,10 @@ def change_picturs():
 
     def add_brightness(val=None):
         """adds Brigthness for the picuteres with a value"""
-        if val == None:
+        if val is None:
             val = brightness_input.value
         if val is None or val == DEFAULT_VALUES[ImageEnum.Brightness]:
-            ui.notify("The Value is Nothing or default value ", type="negativ")
+            ui.notify("The Value is Nothing or default value ", type="negative")
             return
         pictures_stats.append(PictureEntry(brightness=val))
         brightness_values = []
@@ -183,7 +183,7 @@ def change_picturs():
         if val is None:
             val = gaus_input.value
         if val is None or val == DEFAULT_VALUES[ImageEnum.Gaus]:
-            ui.notify("The Value is Nothing or default value ", type="negativ")
+            ui.notify("The Value is Nothing or default value ", type="negative")
             return
         pictures_stats.append(PictureEntry(gaus=val))
         gaus_values = []
@@ -224,7 +224,7 @@ def change_picturs():
                     if img.mirrored:
                         image = await run.io_bound(transformer.mirror, image)
                 ui.notify(f"Changed everything image with stats {img}", type="positive")
-        ui.notify(f"This doesen't work at moment", type="negative")
+        ui.notify("This doesen't work at moment", type="negative")
 
     brightness_input = ui.number(
         "Brightness value", step=0.1, value=DEFAULT_VALUES[ImageEnum.Brightness]
