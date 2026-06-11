@@ -105,14 +105,14 @@ class ImageTransformer:
     # --- Public transforms ---
 
     def adjust_brightness(self, factor=1.5):
-        """Adjust the brightness of the image."""
+        """Adjust the brightness of all the images."""
         return self._apply_transform(
             suffix=f"brit-{factor}",
             transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor),
         )
 
     def adjust_brightness_to_single(self, path, factor=1.5, tmp_folder=False):
-        """Adjust the brightness of the image."""
+        """Adjust the brightness of a single image."""
         return self._apply_transform_to_single(
             suffix=f"brit-{factor}",
             transform_fn=lambda img: ImageEnhance.Brightness(img).enhance(factor),
@@ -121,7 +121,7 @@ class ImageTransformer:
         )
 
     def add_gaussian_filter(self, strength=1):
-        """Adds a Gaussian filter to the image."""
+        """Adds a Gaussian filter to all the images."""
         return self._apply_transform(
             suffix=f"gaus-{strength}",
             transform_fn=lambda img: img.filter(
@@ -130,7 +130,7 @@ class ImageTransformer:
         )
 
     def add_gaussian_filter_to_single(self, path, strength=1, tmp_folder=False):
-        """Adds a Gaussian filter to the image."""
+        """Adds a Gaussian filter to a single image."""
         return self._apply_transform_to_single(
             suffix=f"gaus-{strength}",
             transform_fn=lambda img: img.filter(
@@ -141,7 +141,7 @@ class ImageTransformer:
         )
 
     def mirror(self):
-        """Mirrors the image."""
+        """Mirrors the all images."""
         return self._apply_transform(
             suffix="mirrored",
             transform_fn=ImageOps.mirror,

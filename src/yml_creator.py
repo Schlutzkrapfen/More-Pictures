@@ -1,6 +1,7 @@
-import yaml
 from pathlib import Path
- 
+
+import yaml
+
 DEFAULT_CONFIG = {
     "local": {
         # If True, use local files instead of the Label Studio API
@@ -39,13 +40,13 @@ DEFAULT_CONFIG = {
         # List of brightness factors to apply, e.g. [0.5, 1.5]
         "brigtness_list": [],
         # If True, brightness can be combined with other augmentations. (See ImageStatEnum how the )
-        "brightness_combination": [False,False,False],
+        "brightness_combination": [False, False, False],
     },
     "gauss": {
         # List of Gaussian blur kernel sizes to apply, e.g. [3, 5]
         "gauss_list": [],
         # If True, Gaussian blur can be combined with other augmentations
-        "gauss_combination": [False,False,False],
+        "gauss_combination": [False, False, False],
     },
     "mirrored": {
         # If True, mirrored versions of images will be generated
@@ -54,16 +55,16 @@ DEFAULT_CONFIG = {
         "mirrored_combination": [False, False, False],
     },
 }
-def generate_default_config(output_path: str = "config.yml") :
-        try:
-            Path(output_path).write_text(
+
+
+def generate_default_config(output_path: str = "config.yml"):
+    try:
+        Path(output_path).write_text(
             yaml.dump(DEFAULT_CONFIG, default_flow_style=False, sort_keys=False),
             encoding="utf-8",
-            )
-            print("made a new default yml")
-            return output_path
-        except:
-              print("Something went wrong with creating a new deafult yml")
-              return None
-        
-
+        )
+        print("made a new default yml")
+        return output_path
+    except Exception as e:
+        print(f"Something went wrong with creating a new deafult yml. Error {e}")
+        return None

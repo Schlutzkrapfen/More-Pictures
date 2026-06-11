@@ -1,5 +1,4 @@
 import json
-import sys
 from pathlib import Path
 
 import requests
@@ -11,7 +10,7 @@ from typing_extensions import Any
 from yml_creator import generate_default_config
 
 
-def load_config(file_path="config.yml") -> None | Any:
+def load_config(file_path: str = "config.yml") -> None | Any:
     """Loads and returns the full config dict."""
     try:
         with open(file_path, "r") as f:
@@ -30,9 +29,12 @@ def load_config(file_path="config.yml") -> None | Any:
         print(f"Error: Failed to parse YAML file: {e}")
 
 
-def load_picture_conf(file_path="config.yml"):
+def load_picture_conf(file_path: str = "config.yml"):
     """Loads picture settings with brightness and gauss."""
     config = load_config(file_path)
+    if config is None:
+        raise ValueError("config is Null")
+
     brightness = config.get("brightness", {})
     mirror = config.get("mirrored", {})
     gauss = config.get("gauss", {})
@@ -66,6 +68,8 @@ def load_setup_conf(file_path="config.yml"):
     """loads config with url,api key,project id, output dir, only completed"""
 
     config = load_config(file_path)
+    if config is None:
+        raise ValueError("config is Null")
     lo_section = config.get("local", {})
     ls_section = config.get("label_studio", {})
     dl_section = config.get("download", {})
@@ -82,7 +86,7 @@ def load_setup_conf(file_path="config.yml"):
     }
 
 
-def connect_label_studio(base_url, api_key, project_id):
+def connect_label_studio(base_url: str, api_key: str, project_id: int):
     """Checks if it can connect to label studio"""
     if not base_url or not api_key or api_key == "YOUR_API_KEY":
         print(" Error: URL or API Key is missing in the config file.")
@@ -102,7 +106,7 @@ def connect_label_studio(base_url, api_key, project_id):
     return None
 
 
-def fetch_tasks(client, project_id, only_completed=True):
+def fetch_tasks(client, project_id: int, only_completed: bool = True) -> list:
     """Fetch all tasks from the project, optionally filtering for completed ones only."""
     print(f"\n  Fetching tasks (only_completed={only_completed})...")
     try:
@@ -122,7 +126,7 @@ def fetch_tasks(client, project_id, only_completed=True):
         return []
 
 
-def save_tasks(tasks, output_dir, project_id):
+def save_tasks(tasks, output_dir: str, project_id: int) -> Path:
     """Save fetched tasks to a JSON file inside output_dir. reuterns path"""
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -146,7 +150,7 @@ def save_tasks(tasks, output_dir, project_id):
     return output_file
 
 
-def donwload_image(task, api_key, url, output_dir):
+def donwload_image(task, api_key: str, url: str, output_dir: str) -> str:
     """downloads a single Image and returns path"""
     image_path = task.data.get("image")
     out_path = Path(output_dir)
@@ -170,7 +174,7 @@ def donwload_image(task, api_key, url, output_dir):
         )
 
 
-def download_images(tasks, api_key, url, output_dir) -> str:
+def download_images(tasks, api_key: str, url: str, output_dir: str) -> list[str]:
     """Downloads all the Images and returns their path in a Array"""
 
     out_path = Path(output_dir)
@@ -196,13 +200,13 @@ def download_images(tasks, api_key, url, output_dir) -> str:
             download += 1
             images_paths.append(save_path)
         else:
-            print(f"Error when Saving")
+            print("Error when Saving")
             skipped += 1
     print(f"downloaded: {download}, skipped: {skipped}")
     return images_paths
 
 
-def get_local_picutrs(path):
+def get_local_picutrs(path: str):
     """Gets the all the pictures that are stored in the folder that you give"""
     extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
     images_paths = [p for p in Path(path).iterdir() if p.suffix.lower() in extensions]

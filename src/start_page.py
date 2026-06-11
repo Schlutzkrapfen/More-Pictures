@@ -13,9 +13,10 @@ json_path_glob = ""
 
 
 def try_connection(url, api_key, project_id=1):
+    """Tries the connection if it can connect with label studio"""
     try:
         client = connect_label_studio(url, api_key, int(project_id))
-        if client is not None:
+        if client is None:
             ui.notify("Error one of the Input fields is wrong", type="negative")
         else:
             save_setup_conf(url=url, api_key=api_key, project_id=int(project_id))
@@ -27,10 +28,11 @@ def try_connection(url, api_key, project_id=1):
 
 
 def download(picure_path, json_path, output_path):
+    """Tries the folder that are locally stored"""
     try:
         pictuers = get_local_picutrs(picure_path)
     except Exception as e:
-        ui.notify(f"Folder Path is wrong. Exact Error:{e}", type="negative")
+        ui.notify(f"Folder Path is wrong. Error:{e}", type="negative")
         return
     print(len(pictuers))
     if pictuers is None or len(pictuers) == 0:
@@ -39,7 +41,7 @@ def download(picure_path, json_path, output_path):
     try:
         json = get_local_json(json_path)
     except Exception as e:
-        ui.notify(f"Json path is wrong Error {e}", type="negative")
+        ui.notify(f"Json path is wrong. Error {e}", type="negative")
         return
     if json is None:
         ui.notify("Json path is wrong", type="negative")
