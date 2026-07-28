@@ -5,8 +5,6 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 from nicegui import ui
 
-import augumantation_page
-import download_page
 from downloader import (
     connect_label_studio,
     download_images,
@@ -18,7 +16,6 @@ from downloader import (
     save_tasks,
 )
 from ImageTransformer import ImageTransformer
-from start_page import set_up_connection
 
 
 def run_without_gui():
@@ -68,13 +65,24 @@ def run_without_gui():
             transformer.add_gaussian_filter(strength)
 
 
-def find_free_port():
+def find_free_port()->int:
+    """
+        Find an available port on the local machine.
+
+        Binds a temporary socket to port 0, which asks the OS to assign
+        an unused ephemeral port, then closes the socket and returns
+        that port number for reuse.
+
+        Returns:
+            int: An available port number.
+        """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
         return s.getsockname()[1]
 
 
 def main():
+    """Main Programm"""
     if "--no-gui" in sys.argv:
         run_without_gui()
         return

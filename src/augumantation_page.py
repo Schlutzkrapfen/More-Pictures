@@ -87,7 +87,7 @@ async def change_picturs():
         pictures_stats.append(PictureEntry())
         refresh_previews()
 
-    def get_attr(pic, index) -> Any:
+    def get_attr(pic, index):
         """Helper to get the relevant attribute based on index."""
         match index:
             case ImageEnum.Brightness:
@@ -222,7 +222,7 @@ async def change_picturs():
                         transformer.adjust_brightness_to_single, pic, val
                     )
                     if img.mirrored:
-                        image = await run.io_bound(transformer.mirror, image)
+                        image = await run.io_bound(transformer.mirror_single, image)
                 ui.notify(f"Changed everything image with stats {img}", type="positive")
         ui.notify("This doesen't work at moment", type="negative")
 
