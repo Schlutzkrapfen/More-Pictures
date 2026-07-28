@@ -87,13 +87,15 @@ async def change_picturs():
         pictures_stats.append(PictureEntry())
         refresh_previews()
 
-    def get_attr(pic, index):
+    def get_attr(pic, index)-> float:
         """Helper to get the relevant attribute based on index."""
         match index:
             case ImageEnum.Brightness:
                 return pic.brightness
             case ImageEnum.Gaus:
                 return pic.gaus
+            case _:
+                return 0.0
 
     def update_combination(index: ImageEnum, value: bool):
         """updtaes the combination of the pictures (works just with mirror at the moment)"""
@@ -159,8 +161,20 @@ async def change_picturs():
             on_change=lambda e: update_combination(ImageEnum.Gaus, e.value),
         )
 
-    def add_brightness(val=None):
-        """adds Brigthness for the picuteres with a value"""
+    def add_brightness(val:None | float=None):
+        """Apply a brightness adjustment and update the augmentation config.
+
+           Args:
+               val (float | None, optional): Brightness value to apply.
+                   Defaults to the current value of `brightness_input`.
+                   Side Effects:
+                           - Appends a new `PictureEntry` to `pictures_stats`.
+                           - Updates the saved augmentation configuration via
+                             `save_augumatiaion_conf`.
+                           - Triggers a UI notification if the value is invalid.
+                           - Refreshes the image previews.
+
+        """
         if val is None:
             val = brightness_input.value
         if val is None or val == DEFAULT_VALUES[ImageEnum.Brightness]:
@@ -178,8 +192,20 @@ async def change_picturs():
         save_augumatiaion_conf(brightness=brightness_values)
         refresh_previews()
 
-    def add_gaus(val=None):
-        """adds a gaus filter to a picture"""
+    def add_gaus(val: float | None =None):
+        """
+            Apply a Gaussian filter adjustment and update the augmentation config.
+
+            Args:
+                val (float | None, optional): Gaussian filter value to apply.
+                    Defaults to the current value of `gaus_input`.
+            Side Effects:
+                            - Appends a new `PictureEntry` to `pictures_stats`.
+                            - Updates the saved augmentation configuration via
+                              `save_augumatiaion_conf`.
+                            - Triggers a UI notification if the value is invalid.
+                            - Refreshes the image previews.
+        """
         if val is None:
             val = gaus_input.value
         if val is None or val == DEFAULT_VALUES[ImageEnum.Gaus]:
